@@ -179,6 +179,6 @@ class pollended extends \phpbb\notification\type\base
 		$this->set_data('poll_title', $data['poll_title']);
 		$this->set_data('poll_end', (int) $data['poll_end']);
 
-		return parent::create_insert_array($data, $pre_create_data);
+		parent::create_insert_array($data, $pre_create_data);
 	}
 }
