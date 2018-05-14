@@ -3,8 +3,8 @@
 	"type": "phpbb-extension",
 	"description": "Advances the core poll system of phpBB with new features like hiding votes till end, showing poll voters, limiting the votes and more.",
 	"homepage": "https://github.com/jasoloz/advancedpolls",
-	"version": "1.2.3",
-	"time": "2018-02-19",
+	"version": "1.2.4",
+	"time": "2018-05-14",
 	"keywords": ["phpbb", "extension", "advancedpolls", "advanced", "poll"],
 	"license": "GPL-2.0",
 	"authors": [
@@ -23,6 +23,11 @@
 			"name": "José Alfonso Solera (jasolo)",
 			"email": "jasolo.f@gmail.com",
 			"role": "Developer"
+		},
+		{
+			"name": "Leinad4Mind",
+			"homepage": "https://leinad4mind.top/forum",
+			"role": "Developer"
 		}
 	],
 	"require": {
@@ -35,7 +40,7 @@
 	"extra": {
 		"display-name": "Advanced Polls",
 		"soft-require": {
-			"phpbb/phpbb": ">=3.1.5,<3.2.*@dev"
+			"phpbb/phpbb": ">=3.1.5,<3.3.*@dev"
 		},
 		"version-check": {
 			"host": "jasoloz.github.io",
