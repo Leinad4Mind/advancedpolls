@@ -65,12 +65,12 @@ $lang = array_merge($lang, array(
 	'AP_ACT_POLL_END_EXPLAIN'		=> 'Aktiviert die Möglichkeit, eine Umfrgae zu einem Zeitpunkt zu beenden (Datum/ Uhrzeit), anstatt eine Umfragedauer festzulegen.',
 	'AP_ACT_POLL_NOTIFICATIONS'				=> 'Aktiviere Umfrage Benachrichtigungen',
 	'AP_ACT_POLL_NOTIFICATIONS_EXPLAIN'		=> 'Aktiviert das Versenden von Benachrichtigungen an alle Umfrageteilnehmer, sobald eine verborgene Umfrage beendet ist und die Ergebnisse sichtbar sind.',
-	'AP_ACT_SHOW_ORDERED'			=>	'Die Ergebnisse absteigend nach der Anzahl der erhaltenen Stimmen anzeigen (am meisten Gewähltes zuerst).',
 
-	'AP_DEFAULT_SHOW_ORDERED'			=> 'Standardeinstellung "Sortierte Anzeige"',
+
+	'AP_DEFAULT_SHOW_ORDERED'			=> 'Sortierte Anzeige',
 	'AP_DEFAULT_SHOW_ORDERED_EXPLAIN'	=> 'Aktiviert die Option, die Ergebnisse absteigend nach der Anzahl der erhaltenen Stimmen anzuzeigen (am meisten Gewähltes zuerst).',
-	'AP_DEFAULT_VOTES_CHANGE'			=> 'Standardeinstellung "Ändern der Abstimmung erlauben"',
-	'AP_DEFAULT_VOTES_HIDE'				=> 'Standardeinistellung "Verbergen der Abstimmungsergebnisse"',
-	'AP_DEFAULT_VOTERS_SHOW'			=> 'Standardeinstellung "Anzeigen von Benutzern, die abgestimmt haben"',
-	'AP_DEFAULT_VOTERS_LIMIT'			=> 'Standardeinstellung "Einschränkung der Abstimmung"',
+	'AP_DEFAULT_VOTES_CHANGE'			=> 'Standard für "Ändern der Abstimmung erlauben"',
+	'AP_DEFAULT_VOTES_HIDE'				=> 'Standard für "Verbergen der Abstimmungsergebnisse"',
+	'AP_DEFAULT_VOTERS_SHOW'			=> 'Standard für "Anzeigen von Benutzern, die abgestimmt haben"',
+	'AP_DEFAULT_VOTERS_LIMIT'			=> 'Standard für "Einschränkung der Abstimmung"',
 ));

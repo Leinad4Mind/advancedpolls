@@ -1,17 +1,13 @@
 <?php
 /**
-*
-* Advanced Polls extension for the phpBB Forum Software package.
-* French translation by Galixte (http://www.galixte.com) & Chouf (https://www.phpbb.com/community/memberlist.php?mode=viewprofile&u=1352822)
-*
-* @copyright (c) 2015 Clemens Husung (Wolfsblvt) <www.pinkes-forum.de>
-* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
-*
-*/
-
-/**
- * DO NOT CHANGE
+ *
+ * Advanced Polls [Polish]
+ * Polish translation by Lech-u (https://www.phpbb.com/community/memberlist.php?mode=viewprofile&u=1616616)*
+ * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
+ * @author Clemens Husung (Wolfsblvt)
  */
+
 if (!defined('IN_PHPBB'))
 {
 	exit;
@@ -19,7 +15,7 @@ if (!defined('IN_PHPBB'))
 
 if (empty($lang) || !is_array($lang))
 {
-	$lang = [];
+	$lang = array();
 }
 
 // DEVELOPERS PLEASE NOTE
@@ -35,11 +31,10 @@ if (empty($lang) || !is_array($lang))
 // in a url you again do not need to specify an order e.g., 'Click %sHERE%s' is fine
 //
 // Some characters you may want to copy&paste:
-// ’ « » “ ” …
+// ’ » “ ” …
 //
 
-// User Permissions
-$lang = array_merge($lang, [
-	'ACL_F_SEEVOTERS' => 'Peut voir le nom des votants des sondages.',
-	'ACL_M_SEEVOTERS' => 'Peut voir le nom des votants des sondages.',
-]);
+$lang = array_merge($lang, array(
+	'NOTIFICATION_AP_POLL_ENDED'		=> '<strong>Wyniki będą widoczne w ankiecie</strong>:',
+	'NOTIFICATION_TYPE_AP_POLL_ENDED'	=> 'Wyniki są teraz widoczne dla ankiety, w której głosowałeś',
+));
