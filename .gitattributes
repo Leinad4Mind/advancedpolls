@@ -2,8 +2,12 @@
 * text=auto
 
 # Export ignore for downloads of this repo
-tests/				export-ignore
-travis/				export-ignore
+/.github			export-ignore
+/.github/**			export-ignore
+/tests				export-ignore
+/tests/**			export-ignore
+/travis				export-ignore
+/travis/**			export-ignore
 .codeclimate.yml	export-ignore
 .gitattributes		export-ignore
 .gitignore			export-ignore
@@ -15,3 +19,5 @@ composer.lock		export-ignore
 features.txt		export-ignore
 phpunit.xml.*		export-ignore
 README.md			export-ignore
+/styles/subsilver2		export-ignore
+/styles/subsilver2/**	export-ignore

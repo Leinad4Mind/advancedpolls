@@ -1,0 +1,109 @@
+name: Build release package
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Package and draft release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate tag and package metadata
+        id: metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          composer_version="$(php -r '$data = json_decode(file_get_contents("composer.json"), true, 512, JSON_THROW_ON_ERROR); echo $data["version"];')"
+
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag ${tag} is not a valid stable semantic version tag." >&2
+            exit 1
+          fi
+
+          if [[ "$tag" != "v${composer_version}" ]]; then
+            echo "Tag ${tag} does not match composer.json version ${composer_version}." >&2
+            exit 1
+          fi
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "archive=advancedpolls-${version}.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Build phpBB extension package
+        shell: bash
+        env:
+          VERSION: ${{ steps.metadata.outputs.version }}
+          ARCHIVE: ${{ steps.metadata.outputs.archive }}
+        run: |
+          set -euo pipefail
+
+          package_root="build/wolfsblvt/advancedpolls"
+          mkdir -p "$package_root"
+          git archive --format=tar HEAD | tar -xf - -C "$package_root"
+
+          expected=(
+            acp
+            adm
+            composer.json
+            config
+            controller
+            core
+            cron
+            event
+            ext.php
+            language
+            license.txt
+            migrations
+            notification
+            styles
+          )
+
+          mapfile -t actual < <(find "$package_root" -mindepth 1 -maxdepth 1 -printf '%f\n' | sort)
+          mapfile -t wanted < <(printf '%s\n' "${expected[@]}" | sort)
+          if [[ "$(printf '%s\n' "${actual[@]}")" != "$(printf '%s\n' "${wanted[@]}")" ]]; then
+            echo "Unexpected release package contents:" >&2
+            diff -u <(printf '%s\n' "${wanted[@]}") <(printf '%s\n' "${actual[@]}") || true
+            exit 1
+          fi
+
+          (
+            cd build
+            zip -X -r "../${ARCHIVE}" wolfsblvt
+          )
+          sha256sum "$ARCHIVE" > "${ARCHIVE}.sha256"
+
+      - name: Create draft GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE: ${{ steps.metadata.outputs.archive }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          gh release create "$GITHUB_REF_NAME" \
+            "$ARCHIVE#Installable phpBB extension package" \
+            "${ARCHIVE}.sha256#SHA-256 checksum" \
+            --draft \
+            --verify-tag \
+            --generate-notes \
+            --fail-on-no-commits \
+            --title "Advanced Polls ${VERSION}"
