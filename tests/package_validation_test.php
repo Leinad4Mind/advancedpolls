@@ -146,9 +146,9 @@ class package_validation_test extends TestCase
 		);
 	}
 
-	public function test_all_three_themes_expose_each_interactive_feature_safely()
+	public function test_prosilver_exposes_each_interactive_feature_safely()
 	{
-		$styles = array('prosilver', 'FLATBOOTS', 'BBOOTS');
+		$styles = array('prosilver');
 		$required = array(
 			'template/event/overall_header_head_append.html',
 			'template/event/posting_editor_subject_before.html',

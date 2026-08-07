@@ -10,7 +10,7 @@ Advanced Polls extends phpBB's poll system with configurable visibility and vote
 
 - phpBB 3.3.0 or later (phpBB 4 is not supported)
 - PHP 7.1.3 or later
-- One of the included styles: prosilver, BBOOTS, or FLATBOOTS
+- The prosilver style
 
 ## Features
 
@@ -74,7 +74,7 @@ Advanced Polls extends phpBB's poll system with configurable visibility and vote
 - Added ordered ranking polls with automatic points based on selection order.
 - Added globally shared scoring/ranking rules across question pages.
 - Added independently configurable collapsible polls.
-- Added and adapted templates for BBOOTS and FLATBOOTS.
+- Added and refined the prosilver templates and styling.
 
 ### 1.3.0
 

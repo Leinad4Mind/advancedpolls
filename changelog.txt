@@ -35,7 +35,7 @@ Past Versions
 	• NEW: Added collapsible polls controlled globally in the ACP and individually per poll
 	• NEW: Collapsible polls default to enabled when phpbb/collapsiblecategories is installed, while remaining manually configurable
 	• Improvement: Poll type, limits, scoring/ranking rules, visibility and vote-change rules are shared across all question pages
-	• Improvement: Added and adapted templates and styling for prosilver, BBOOTS and FLATBOOTS
+	• Improvement: Added and refined the prosilver templates and styling
 	• Improvement: Retaining a deleted user's posts preserves their vote and retained username; deleting their posts removes their vote
 	• Security: Added server-side validation and transactional storage for complete multi-question ballots
 	• Security: Added guest ballot tokens and protection against repeated submissions
