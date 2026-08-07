@@ -1,8 +1,8 @@
 <?php
 /**
  *
- * Advanced Polls [Deutsch]
- *
+ * Advanced Polls [Polish]
+ * Polish translation by Lech-u (https://www.phpbb.com/community/memberlist.php?mode=viewprofile&u=1616616)*
  * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)
@@ -43,5 +43,6 @@ if (empty($lang) || !is_array($lang))
 
 // User Permissions
 $lang = array_merge($lang, array(
-	'ACL_U_SEE_VOTERS'			=> 'Kann die Benutzer sehen, die abgestimmt haben',
+	'ACL_F_SEEVOTERS'			=> 'Możesz zobaczyć głosujących.',
+	'ACL_M_SEEVOTERS'			=> 'Możesz wyświetlać głosujących w ankiecie.',
 ));
