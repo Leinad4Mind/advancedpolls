@@ -136,7 +136,9 @@ class package_validation_test extends TestCase
 
 	public function test_phpbb_poll_title_limit_is_100_characters()
 	{
-		$parser = file_get_contents(dirname($this->extension_root(), 3) . '/includes/message_parser.php');
+		$phpbb_root = getenv('PHPBB_ROOT_PATH');
+		$phpbb_root = $phpbb_root ? rtrim($phpbb_root, '/\\') : dirname($this->extension_root(), 3);
+		$parser = file_get_contents($phpbb_root . '/includes/message_parser.php');
 
 		$this->assertMatchesRegularExpression(
 			"/utf8_strlen\\(preg_replace\\([^\\r\\n]+\\)\\) > 100\\)/",

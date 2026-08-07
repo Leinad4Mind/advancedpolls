@@ -1,16 +1,71 @@
-Actual Version
-**************
+Current Version
+***************
+-- Version 1.6.0 --------------
+	• NEW: Numeric scoring polls can display accumulated points or the arithmetic average for each option
+	• NEW: Detailed scoring distributions show how many voters assigned each score
+	• NEW: Detailed ranking distributions show how many voters assigned each position
+	• NEW: Scoring polls can hide percentage labels while retaining correctly scaled result bars
+	• NEW: Added a permission-aware directory of open and closed polls
+	• NEW: Added an ACP option to display the poll directory in the navigation bar
+	• Improvement: Voter information and result breakdowns are loaded through AJAX without refreshing the topic
+	• Improvement: Average results and breakdowns are supported on both primary and additional question pages
+	• Improvement: Poll directory results respect forum access, topic visibility and poll result visibility
+	• Improvement: Updated all included language packs and expanded automated tests
+
+
+###########################################################################
+Past Versions
+*************
+
+-- Version 1.5.0 --------------
+	• NEW: Poll options can be appended to an active poll without resetting existing votes
+	• NEW: Previous registered voters can be notified when new options are added
+	• NEW: Option additions are recorded in a revision log
+	• Improvement: A fairness warning explains that previous voters may not have seen newly added options
+	• Security: Safe append mode requires vote changes to be enabled
+	• Security: Safe append mode rejects ended polls and changes that rename, remove or reorder existing questions or options
+	• Security: Added validation for option limits, form keys and concurrent poll edits
+
+-- Version 1.4.0 --------------
+	• NEW: Added multi-question polls presented as pages in one ballot
+	• NEW: Questions can be required or optional
+	• NEW: Added ordered ranking polls with automatic points based on the user's selection order
+	• NEW: Poll creators can configure a positive, strictly decreasing point value for each ranking position
+	• NEW: Added AJAX voting and navigation for multi-question polls
+	• NEW: Added collapsible polls controlled globally in the ACP and individually per poll
+	• NEW: Collapsible polls default to enabled when phpbb/collapsiblecategories is installed, while remaining manually configurable
+	• Improvement: Poll type, limits, scoring/ranking rules, visibility and vote-change rules are shared across all question pages
+	• Improvement: Added and adapted templates and styling for prosilver, BBOOTS and FLATBOOTS
+	• Improvement: Retaining a deleted user's posts preserves their vote and retained username; deleting their posts removes their vote
+	• Security: Added server-side validation and transactional storage for complete multi-question ballots
+	• Security: Added guest ballot tokens and protection against repeated submissions
+
+-- Version 1.3.0 --------------
+	• NEW: Added four result visibility modes: public, after first vote, after all available votes are used, and private until the poll ends
+	• NEW: Added three vote-change modes: no change, incremental voting, and allow changes
+	• NEW: Registered users can delete their own vote when enabled and vote changes are allowed
+	• NEW: Added optional abstainer counts and names for users who explicitly choose not to vote
+	• NEW: Added ACP defaults for result visibility and vote-change modes
+	• NEW: Added post-installation guidance for extension settings and voter permissions
+	• Improvement: Restored poll-end notifications and made them persistent and single-delivery per poll
+	• Improvement: Added a compatibility gate for phpBB 3.3.0 or later and PHP 7.1.3 or later
+	• Improvement: Fixed exact poll end date/time parsing and duration calculations
+	• Improvement: Updated and completed all included language catalogues
+	• Bug fix: Prevented hidden poll results from being exposed through AJAX responses
+	• Bug fix: Fixed duplicate or missing poll-end notification processing
+	• Bug fix: Fixed poll display after a voter account is deleted
+	• Security: Added validation for unknown poll option IDs and invalid, negative or oversized scoring values
+	• Security: Enforced per-option and total scoring limits on the server
+	• Security: Prevented incremental voting from reducing or removing votes already submitted
+	• Security: Added form-key validation to vote deletion and abstention actions
+	• Testing: Added automated coverage for poll logic, migrations, notifications, AJAX responses, templates and translations
+
 -- Version 1.2.1-b1 --------------
 	• NEW: Implemented "Poll duration in hours" - allows to specify the duration of a poll in multiple units (days or hours)
 	• Bug fix: Remove old permission
 	• Bug fix: Check compatibility of options (max votes, total votes, max options)
 	• Improvement: Improve language describing poll end behavior (defaults)
 	• Workaround: Language file incorrectly loaded from board language rather than user language (core bug)
-
-
-###########################################################################
-Past Versions
-*************
 
 -- Version 1.2.0-b1 --------------
 	• Use new functionality and events in 3.1.5
@@ -24,7 +79,6 @@ Past Versions
 	• Implemented "Moderators see voters" - add a permission to allow moderators to see poll voters
 	• Implemented some of the above changes made available in AJAX calls (scoring, see poll voters)
 	• Multiple bug fixes
-
 
 -- Version 1.1.0-b2 --------------
 	• Implemented "Public polls" - who voted what is public when results are visible for selected polls
