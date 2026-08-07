@@ -193,6 +193,8 @@ class package_validation_test extends TestCase
 			$this->assertStringContainsString('name="ap_multi_questions"', $posting);
 			$this->assertStringContainsString('name="ap_append_poll_options"', $posting);
 			$this->assertStringContainsString('AP_CAN_APPEND_OPTIONS', $posting);
+			$this->assertStringContainsString('type="button" class="button2 ap-add-question"', $posting);
+			$this->assertStringNotContainsString('<button type="button" class="button2 ap-add-question">', $posting);
 			if ($style !== 'prosilver')
 			{
 				$this->assertStringContainsString('form-control input-sm ap-config-select', $posting);
@@ -236,8 +238,16 @@ class package_validation_test extends TestCase
 			$this->assertStringContainsString("'vote_id[' + optionId + ']'", $onload);
 
 			$date = file_get_contents($root . 'template/js/poll_length_posting.js');
+			$this->assertStringContainsString('type="datetime-local" id="wolfsblvt_poll_end_datetime"', $posting);
+			$this->assertStringContainsString('step="60"', $posting);
+			$this->assertStringContainsString('onfocus="apRefreshPollEndMinimum();"', $posting);
+			$this->assertStringContainsString('type="hidden" id="wolfsblvt_poll_end_year"', $posting);
+			$this->assertStringNotContainsString('type="number" onchange="apAdjustEnd(', $posting);
 			$this->assertStringContainsString('apPollEnd.getHours()).slice(-2)', $date);
 			$this->assertStringContainsString('apPollEnd.getMinutes()).slice(-2)', $date);
+			$this->assertStringContainsString('function apAdjustEndDateTime(val)', $date);
+			$this->assertStringContainsString("input.min = apDateTimeValue(minimum)", $date);
+			$this->assertStringContainsString('new Date(apPollStart.getTime())', $date);
 
 			$multi_template = file_get_contents($root . 'template/event/viewtopic_body_poll_after.html');
 			$this->assertStringContainsString('data-vote-url="{AP_MULTI_VOTE_URL}"', $multi_template);

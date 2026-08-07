@@ -173,6 +173,12 @@ class advancedpolls
 
 			// Calculate poll_start and poll_length based on poll_end, if specified in the form
 			$new_poll_end = $this->user->get_timestamp_from_format('Y-n-j-G-i', sprintf('%d-%d-%d-%02d-%02d', $new_poll_end_ary['year'], $new_poll_end_ary['mon'], $new_poll_end_ary['mday'], $new_poll_end_ary['hours'], $new_poll_end_ary['minutes']));
+			$duration_mode = $this->request->variable('wolfsblvt_poll_duration', '');
+
+			if ($duration_mode === 'wolfsblvt_poll_end' && $new_poll_end <= $current_time)
+			{
+				return array($this->user->lang['AP_POLL_END_INVALID']);
+			}
 
 			$new_poll_length = 0;
 			if (abs($new_poll_end - $poll_end) > 60)

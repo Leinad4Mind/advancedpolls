@@ -291,6 +291,49 @@ class advancedpolls_core_test extends TestCase
 		$this->assertTrue($breakdowns[4]['average_mode']);
 	}
 
+	public function test_explicit_end_date_must_be_in_the_future()
+	{
+		$past = array(
+			'wolfsblvt_poll_duration' => 'wolfsblvt_poll_end',
+			'wolfsblvt_poll_end_year' => 2000,
+			'wolfsblvt_poll_end_mon' => 1,
+			'wolfsblvt_poll_end_mday' => 1,
+			'wolfsblvt_poll_end_hours' => 0,
+			'wolfsblvt_poll_end_minutes' => 0,
+		);
+		$poll = array(
+			'poll_start' => 0,
+			'poll_length' => 0,
+			'poll_max_options' => 1,
+		);
+		$core = $this->create_core($past, array(
+			'wolfsblvt.advancedpolls.activate_poll_end' => 1,
+		));
+
+		$this->assertSame(array('Invalid end'), $core->check_config_for_polls($poll));
+
+		$future_timestamp = time() + 86400;
+		$future = array(
+			'wolfsblvt_poll_duration' => 'wolfsblvt_poll_end',
+			'wolfsblvt_poll_end_year' => (int) gmdate('Y', $future_timestamp),
+			'wolfsblvt_poll_end_mon' => (int) gmdate('n', $future_timestamp),
+			'wolfsblvt_poll_end_mday' => (int) gmdate('j', $future_timestamp),
+			'wolfsblvt_poll_end_hours' => (int) gmdate('G', $future_timestamp),
+			'wolfsblvt_poll_end_minutes' => (int) gmdate('i', $future_timestamp),
+		);
+		$poll = array(
+			'poll_start' => 0,
+			'poll_length' => 0,
+			'poll_max_options' => 1,
+		);
+		$core = $this->create_core($future, array(
+			'wolfsblvt.advancedpolls.activate_poll_end' => 1,
+		));
+
+		$this->assertSame(array(), $core->check_config_for_polls($poll));
+		$this->assertGreaterThan(0, $poll['poll_length']);
+	}
+
 	public function test_editing_existing_poll_restores_nonzero_end_year()
 	{
 		$core = $this->create_core(array(), array(
@@ -462,6 +505,10 @@ class advancedpolls_core_test extends TestCase
 		});
 		$user->method('format_date')->willReturnCallback(function ($timestamp, $format) {
 			return gmdate($format, $timestamp);
+		});
+		$user->method('get_timestamp_from_format')->willReturnCallback(function ($format, $date) {
+			$value = \DateTimeImmutable::createFromFormat('!' . $format, $date, new \DateTimeZone('UTC'));
+			return $value ? $value->getTimestamp() : 0;
 		});
 		$auth = $this->createMock(\phpbb\auth\auth::class);
 		$auth->method('acl_get')->willReturn((bool) $acl);
