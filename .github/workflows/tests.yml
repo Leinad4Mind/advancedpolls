@@ -85,9 +85,9 @@ jobs:
           fail-fast: true
 
       - name: Install phpBB runtime dependencies
-        run: composer install --working-dir=_forum --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+        run: composer install --working-dir=_forum/phpBB --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
       - name: Run test suite
         env:
-          PHPBB_ROOT_PATH: ${{ github.workspace }}/_forum
+          PHPBB_ROOT_PATH: ${{ github.workspace }}/_forum/phpBB
         run: phpunit --configuration phpunit.xml.dist --colors=always
