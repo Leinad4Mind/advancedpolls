@@ -1,36 +1,44 @@
 name: Build release package
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to package, for example v1.6.0
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event.release.tag_name || inputs.tag }}
   cancel-in-progress: false
 
 jobs:
   release:
-    name: Package and draft release
+    name: Package published release
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out tagged source
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
           fetch-depth: 0
           persist-credentials: false
 
       - name: Validate tag and package metadata
         id: metadata
         shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           set -euo pipefail
 
-          tag="${GITHUB_REF_NAME}"
+          tag="${RELEASE_TAG}"
           version="${tag#v}"
           composer_version="$(php -r '$data = json_decode(file_get_contents("composer.json"), true, 512, JSON_THROW_ON_ERROR); echo $data["version"];')"
 
@@ -88,22 +96,27 @@ jobs:
             cd build
             zip -X -r "../${ARCHIVE}" wolfsblvt
           )
+
+          unexpected="$(unzip -Z1 "$ARCHIVE" | grep -Ev '^wolfsblvt/$|^wolfsblvt/advancedpolls(/.*)?$' || true)"
+          if [[ -n "$unexpected" ]]; then
+            echo "Unexpected paths in release archive:" >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 1
+          fi
+          unzip -Z1 "$ARCHIVE" | grep -Fxq 'wolfsblvt/advancedpolls/composer.json'
+
           sha256sum "$ARCHIVE" > "${ARCHIVE}.sha256"
 
-      - name: Create draft GitHub release
+      - name: Upload installable package
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           ARCHIVE: ${{ steps.metadata.outputs.archive }}
-          VERSION: ${{ steps.metadata.outputs.version }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           set -euo pipefail
 
-          gh release create "$GITHUB_REF_NAME" \
+          gh release upload "$RELEASE_TAG" \
             "$ARCHIVE#Installable phpBB extension package" \
             "${ARCHIVE}.sha256#SHA-256 checksum" \
-            --draft \
-            --verify-tag \
-            --generate-notes \
-            --fail-on-no-commits \
-            --title "Advanced Polls ${VERSION}"
+            --clobber
