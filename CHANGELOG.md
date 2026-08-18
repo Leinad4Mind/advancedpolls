@@ -1,0 +1,50 @@
+# Changelog
+
+All notable changes to Advanced Polls are documented here.
+
+## 1.7.0 - 2026-08-18
+
+- Added optional poll start scheduling with local date/time input.
+- Kept scheduled polls hidden while their topics remain visible.
+- Blocked normal, AJAX and multi-question voting before the scheduled start.
+- Excluded future polls from the poll directory and bulk status actions.
+- Based finite poll durations on the scheduled start.
+- Added ACP configuration, migrations, prosilver support and translations for all bundled languages.
+
+## 1.6.1 - 2026-08-18
+
+- Consolidated the unreleased schema repair into the final 1.6.1 migration.
+- Added permission-aware open/close management for individual or selected polls.
+- Improved poll directory pagination, responsive toolbars, row status cues and theme consistency.
+- Fixed encoded URL separators, escaped titles and poll result labels.
+
+## 1.6.0 - 2026-08-06
+
+- Added the searchable and filterable poll directory.
+- Added total/average scoring summaries, score distributions and ranked result breakdowns.
+- Added configurable result percentages and result ordering.
+- Added Danish and completed the bundled language catalogues.
+
+## 1.5.0 - 2026-08-04
+
+- Added permission-controlled appending of options to existing polls.
+- Added notifications when options are appended.
+- Preserved existing votes and validated structural changes.
+
+## 1.4.0 - 2026-08-03
+
+- Added multi-question polls with required and optional questions.
+- Added ranked and scoring vote support for additional questions.
+- Added collapsible poll presentation.
+- Added guest ballot tracking and supporting database tables.
+
+## 1.3.0 - 2026-08-02
+
+- Added explicit result visibility and vote mode policies.
+- Added choice, scoring and ranking poll types.
+- Added poll-end notifications, vote deletion and abstainer display.
+- Retained names for votes belonging to deleted users.
+
+## 1.2.4.3 - 2022-11-29
+
+- Last release from the previous public branch baseline.

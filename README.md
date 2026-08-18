@@ -4,7 +4,7 @@
 [![Tests](https://github.com/Leinad4Mind/advancedpolls/actions/workflows/tests.yml/badge.svg)](https://github.com/Leinad4Mind/advancedpolls/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/license-GPL--2.0-blue.svg)](license.txt)
 
-Advanced Polls extends phpBB's poll system with configurable visibility and vote-change rules, scoring and ranking polls, multi-question ballots, voter information, notifications, and more.
+Advanced Polls extends phpBB's poll system with scheduled starts, configurable visibility and vote-change rules, scoring and ranking polls, multi-question ballots, voter information, notifications, and more.
 
 ## Requirements
 
@@ -41,6 +41,7 @@ Advanced Polls extends phpBB's poll system with configurable visibility and vote
 - Numeric scoring bars can display averages and optionally hide percentage labels.
 - Results may be sorted by their result value.
 - A board-wide poll directory lists accessible open and closed polls, with an optional navigation-bar link.
+- Polls can be prepared with a future start date and time. Their topics remain visible while the poll itself stays hidden and inactive until the scheduled start.
 - Polls can end after a duration in days or hours, or at an exact date and time.
 - Users can collapse individual polls when the feature is enabled in the ACP. It defaults to enabled on a new installation when `phpbb/collapsiblecategories` is installed, but administrators can always override it.
 - Poll voting, multi-question navigation, and voter information use AJAX where supported by the page action.
@@ -55,6 +56,22 @@ Advanced Polls extends phpBB's poll system with configurable visibility and vote
 - Votes belonging to deleted accounts follow the selected phpBB deletion operation: retaining posts preserves the vote under the retained username, while deleting posts removes the vote.
 
 ## Changes by release
+
+### 1.7.0
+
+- Added optional scheduled poll starts using the poll author's local date and time.
+- Kept scheduled polls hidden while their topics remain visible.
+- Blocked normal, AJAX and multi-question voting before the scheduled start.
+- Excluded future polls from the poll directory and bulk status actions.
+- Based finite poll durations on the scheduled start.
+- Added and validated the scheduled poll controls for prosilver.
+
+### 1.6.1
+
+- Added permission-aware open/close management for individual or selected polls.
+- Improved poll directory pagination, toolbars, status cues and theme consistency.
+- Fixed encoded URL separators, escaped titles and poll result labels.
+- Consolidated the final schema migration for unreleased poll-management changes.
 
 ### 1.6.0
 
@@ -112,9 +129,11 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
+Always use this disable/replace/enable sequence. Version 1.7.0 adds the `wolfsblvt_poll_scheduled_start` topic column, and phpBB must run that migration before the updated poll directory is opened.
+
 ## Languages
 
-The repository includes German, German (formal), English, Spanish, French, Hebrew, Italian, Japanese, Dutch, Polish, Portuguese, Brazilian Portuguese, Pre-AO Portuguese, Russian, and Swedish language packs.
+The repository includes Danish, German, German (formal), English, Spanish, French, Hebrew, Italian, Japanese, Dutch, Polish, Portuguese, Brazilian Portuguese, Pre-AO Portuguese, Russian, and Swedish language packs.
 
 ## Authors
 
