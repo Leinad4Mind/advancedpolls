@@ -57,6 +57,11 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 
 ## Changes by release
 
+### 1.7.1
+
+- Fixed scheduled start storage for Unix timestamps on MySQL.
+- Added a safe migration for installations that already enabled version 1.7.0.
+
 ### 1.7.0
 
 - Added optional scheduled poll starts using the poll author's local date and time.
@@ -129,7 +134,7 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
-Always use this disable/replace/enable sequence. Version 1.7.0 adds the `wolfsblvt_poll_scheduled_start` topic column, and phpBB must run that migration before the updated poll directory is opened.
+Always use this disable/replace/enable sequence. Version 1.7.1 corrects the `wolfsblvt_poll_scheduled_start` column type and repairs columns already created by version 1.7.0. phpBB must run the migration before a scheduled poll is created.
 
 ## Languages
 

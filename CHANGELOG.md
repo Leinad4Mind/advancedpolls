@@ -2,6 +2,11 @@
 
 All notable changes to Advanced Polls are documented here.
 
+## 1.7.1 - 2026-08-18
+
+- Fixed the scheduled poll start column using phpBB's portable full timestamp type.
+- Added a migration that widens columns already created by version 1.7.0 without losing data.
+
 ## 1.7.0 - 2026-08-18
 
 - Added optional poll start scheduling with local date/time input.
