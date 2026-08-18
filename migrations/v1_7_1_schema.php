@@ -10,22 +10,17 @@
 
 namespace wolfsblvt\advancedpolls\migrations;
 
-class v1_7_0_schema extends \phpbb\db\migration\migration
+class v1_7_1_schema extends \phpbb\db\migration\migration
 {
-	public function effectively_installed()
-	{
-		return $this->db_tools->sql_column_exists($this->table_prefix . 'topics', 'wolfsblvt_poll_scheduled_start');
-	}
-
 	public static function depends_on()
 	{
-		return array('\wolfsblvt\advancedpolls\migrations\v1_6_1_schema');
+		return array('\wolfsblvt\advancedpolls\migrations\v1_7_0_data');
 	}
 
 	public function update_schema()
 	{
 		return array(
-			'add_columns' => array(
+			'change_columns' => array(
 				$this->table_prefix . 'topics' => array(
 					'wolfsblvt_poll_scheduled_start' => array('TIMESTAMP', 0),
 				),
@@ -35,12 +30,8 @@ class v1_7_0_schema extends \phpbb\db\migration\migration
 
 	public function revert_schema()
 	{
-		return array(
-			'drop_columns' => array(
-				$this->table_prefix . 'topics' => array(
-					'wolfsblvt_poll_scheduled_start',
-				),
-			),
-		);
+		// Do not shrink this column back to MEDIUMINT: populated Unix timestamps
+		// would exceed its range. The 1.7.0 migration drops it during data purge.
+		return array();
 	}
 }

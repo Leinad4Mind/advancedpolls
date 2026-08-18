@@ -25,6 +25,7 @@ use wolfsblvt\advancedpolls\migrations\v1_6_0_schema;
 use wolfsblvt\advancedpolls\migrations\v1_6_1_schema;
 use wolfsblvt\advancedpolls\migrations\v1_7_0_data;
 use wolfsblvt\advancedpolls\migrations\v1_7_0_schema;
+use wolfsblvt\advancedpolls\migrations\v1_7_1_schema;
 
 class integration_contract_test extends TestCase
 {
@@ -333,7 +334,7 @@ class integration_contract_test extends TestCase
 			array('\wolfsblvt\advancedpolls\migrations\v1_6_1_schema'),
 			v1_7_0_schema::depends_on()
 		);
-		$this->assertSame(array('UINT', 0), $columns['wolfsblvt_poll_scheduled_start']);
+		$this->assertSame(array('TIMESTAMP', 0), $columns['wolfsblvt_poll_scheduled_start']);
 		$this->assertSame(
 			array('wolfsblvt_poll_scheduled_start'),
 			$schema_migration->revert_schema()['drop_columns']['phpbb_topics']
@@ -350,6 +351,19 @@ class integration_contract_test extends TestCase
 		$this->assertSame(array(
 			array('config.remove', array('wolfsblvt.advancedpolls.activate_poll_start')),
 		), $data_migration->revert_data());
+	}
+
+	public function test_v1_7_1_repairs_scheduled_start_storage()
+	{
+		$migration = $this->create_schema_migration(v1_7_1_schema::class);
+		$columns = $migration->update_schema()['change_columns']['phpbb_topics'];
+
+		$this->assertSame(
+			array('\wolfsblvt\advancedpolls\migrations\v1_7_0_data'),
+			v1_7_1_schema::depends_on()
+		);
+		$this->assertSame(array('TIMESTAMP', 0), $columns['wolfsblvt_poll_scheduled_start']);
+		$this->assertSame(array(), $migration->revert_schema());
 	}
 
 	public function test_v1_4_data_enables_collapsible_polls_when_categories_extension_is_installed()
