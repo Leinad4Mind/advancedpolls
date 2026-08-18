@@ -334,6 +334,124 @@ class advancedpolls_core_test extends TestCase
 		$this->assertGreaterThan(0, $poll['poll_length']);
 	}
 
+	public function test_scheduled_start_is_validated_saved_and_used_for_duration()
+	{
+		$scheduled_start = time() + 7200;
+		$start_value = gmdate('Y-m-d\\TH:i', $scheduled_start);
+		$expected_start = gmmktime(
+			(int) gmdate('G', $scheduled_start),
+			(int) gmdate('i', $scheduled_start),
+			0,
+			(int) gmdate('n', $scheduled_start),
+			(int) gmdate('j', $scheduled_start),
+			(int) gmdate('Y', $scheduled_start)
+		);
+		$core = $this->create_core(array(
+			'wolfsblvt_poll_start' => $start_value,
+			'wolfsblvt_poll_length_scale' => 1,
+		), array(
+			'wolfsblvt.advancedpolls.activate_poll_start' => 1,
+			'wolfsblvt.advancedpolls.activate_poll_end' => 1,
+		));
+		$poll = array(
+			'poll_start' => 0,
+			'poll_length' => 2,
+			'poll_max_options' => 1,
+		);
+
+		$this->assertSame(array(), $core->check_config_for_polls($poll));
+		$this->assertSame($expected_start, $poll['wolfsblvt_poll_scheduled_start']);
+		$this->assertSame($expected_start + 7200, (int) ($poll['poll_start'] + $poll['poll_length'] * 86400));
+
+		$sql_data = array(TOPICS_TABLE => array('sql' => array(
+			'poll_start' => $poll['poll_start'],
+			'poll_length' => $poll['poll_length'] * 86400,
+		)));
+		$core->save_config_for_polls($sql_data);
+		$this->assertSame($expected_start, $sql_data[TOPICS_TABLE]['sql']['wolfsblvt_poll_scheduled_start']);
+	}
+
+	public function test_invalid_or_past_scheduled_start_is_rejected()
+	{
+		$config = array('wolfsblvt.advancedpolls.activate_poll_start' => 1);
+		$poll = array('poll_start' => 0, 'poll_length' => 0, 'poll_max_options' => 1);
+
+		$core = $this->create_core(array('wolfsblvt_poll_start' => 'invalid'), $config);
+		$this->assertSame(array('Invalid start'), $core->check_config_for_polls($poll));
+
+		$core = $this->create_core(array('wolfsblvt_poll_start' => '2000-01-01T00:00'), $config);
+		$this->assertSame(array('Invalid start'), $core->check_config_for_polls($poll));
+	}
+
+	public function test_existing_scheduled_start_is_preserved_when_field_is_not_posted()
+	{
+		$scheduled_start = time() + 7200;
+		$core = $this->create_core(array(), array(
+			'wolfsblvt.advancedpolls.activate_poll_start' => 1,
+		));
+		$poll = array(
+			'poll_start' => 0,
+			'poll_length' => 0,
+			'poll_max_options' => 1,
+			'wolfsblvt_poll_scheduled_start' => $scheduled_start,
+		);
+
+		$this->assertSame(array(), $core->check_config_for_polls($poll));
+
+		$sql_data = array(TOPICS_TABLE => array('sql' => array()));
+		$core->save_config_for_polls($sql_data);
+		$this->assertSame($scheduled_start, $sql_data[TOPICS_TABLE]['sql']['wolfsblvt_poll_scheduled_start']);
+	}
+
+	public function test_posting_template_restores_future_scheduled_start()
+	{
+		$scheduled_start = time() + 7200;
+		$core = $this->create_core(array(), array(
+			'wolfsblvt.advancedpolls.activate_poll_start' => 1,
+		));
+		$post_data = array(
+			'poll_start' => 0,
+			'poll_length' => 0,
+			'poll_title' => 'Scheduled poll',
+			'poll_options' => array('A', 'B'),
+			'wolfsblvt_poll_scheduled_start' => $scheduled_start,
+		);
+		$page_data = array();
+
+		$core->config_for_polls_to_template($post_data, $page_data);
+
+		$this->assertTrue($page_data['WOLFSBLVT_POLL_START']);
+		$this->assertSame(gmdate('Y-m-d\\TH:i', $scheduled_start), $page_data['WOLFSBLVT_POLL_START_VALUE']);
+	}
+
+	public function test_scheduled_poll_is_hidden_and_cannot_be_voted_early()
+	{
+		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
+		$db->expects($this->never())->method('sql_query');
+		$core = $this->create_core(array(), array(), true, null, $db);
+		$topic = $this->topic_data(poll_options::VISIBILITY_PUBLIC, poll_options::VOTE_MODE_CHANGE);
+		$topic['wolfsblvt_poll_scheduled_start'] = time() + 3600;
+		$vote_counts = array(1 => 0);
+		$cur_voted_id = array();
+		$voted_id = array(1);
+		$poll_info = array(array('poll_option_id' => 1));
+		$can_vote = true;
+		$display_results = true;
+
+		$core->do_poll_voting_modifications($topic, $vote_counts, $cur_voted_id, $voted_id, $poll_info, $can_vote, $display_results, '/topic');
+		$this->assertFalse($can_vote);
+		$this->assertFalse($display_results);
+		$this->assertSame(array(), $voted_id);
+
+		$template_data = array('S_HAS_POLL' => true, 'S_CAN_VOTE' => true, 'S_DISPLAY_RESULTS' => true);
+		$options_data = array(array('POLL_OPTION_ID' => 1));
+		$core->do_poll_template_modifications($topic, $vote_counts, $poll_info, $template_data, $options_data);
+		$this->assertFalse($template_data['S_HAS_POLL']);
+		$this->assertFalse($template_data['S_CAN_VOTE']);
+		$this->assertFalse($template_data['S_DISPLAY_RESULTS']);
+		$this->assertSame(array(), $options_data);
+	}
+
 	public function test_editing_existing_poll_restores_nonzero_end_year()
 	{
 		$core = $this->create_core(array(), array(
@@ -439,6 +557,7 @@ class advancedpolls_core_test extends TestCase
 			'wolfsblvt.advancedpolls.default_poll_vote_mode' => poll_options::VOTE_MODE_NO_CHANGE,
 			'wolfsblvt.advancedpolls.activate_poll_scoring' => 0,
 			'wolfsblvt.advancedpolls.activate_poll_end' => 0,
+			'wolfsblvt.advancedpolls.activate_poll_start' => 0,
 		), $config_values));
 		$template = $this->createMock(\phpbb\template\template::class);
 		$user = $this->createMock(\phpbb\user::class);
@@ -447,6 +566,7 @@ class advancedpolls_core_test extends TestCase
 			'AP_POLL_TOTAL_LOWER_MAX_VOTES' => 'Maximum exceeds total',
 			'AP_POLL_TOTAL_LOWER_MAX_OPTS' => 'Options exceed total',
 			'AP_POLL_END_INVALID' => 'Invalid end',
+			'AP_POLL_START_INVALID' => 'Invalid start',
 			'AP_VISIBILITY_PUBLIC' => 'Public',
 			'AP_VISIBILITY_DEFAULT' => 'Default',
 			'AP_VISIBILITY_VOTE_COMPLETED' => 'Completed',
@@ -517,6 +637,9 @@ class advancedpolls_core_test extends TestCase
 			$request = $this->createMock(\phpbb\request\request::class);
 			$request->method('variable')->willReturnCallback(function ($name, $default) use ($request_values) {
 				return array_key_exists($name, $request_values) ? $request_values[$name] : $default;
+			});
+			$request->method('is_set_post')->willReturnCallback(function ($name) use ($request_values) {
+				return array_key_exists($name, $request_values);
 			});
 		}
 		$dispatcher = $this->createMock(\phpbb\event\dispatcher_interface::class);

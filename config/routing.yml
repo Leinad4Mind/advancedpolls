@@ -16,3 +16,8 @@ wolfsblvt_advancedpolls_poll_list:
     path: /advancedpolls/polls
     defaults: { _controller: wolfsblvt.advancedpolls.controller.poll_list:handle }
     methods: [GET]
+
+wolfsblvt_advancedpolls_poll_manage:
+    path: /advancedpolls/polls/manage
+    defaults: { _controller: wolfsblvt.advancedpolls.controller.poll_list:manage }
+    methods: [POST]

@@ -1,9 +1,9 @@
 <?php
 /**
  *
- * Advanced Polls [English]
+ * Advanced Polls [Deutsch]
  *
- * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ * @copyright (c) 2015 Wolfsblvt
  * @copyright (c) 2026 Leinad4Mind
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)
@@ -36,9 +36,9 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, [
-	'NOTIFICATION_AP_POLL_ENDED'		=> '<strong>Die Ergebnisse sind nun sichtbar für die Umfrage</strong>:',
-	'NOTIFICATION_TYPE_AP_POLL_ENDED'	=> 'Die Ergebnisse für eine Umfrage, an der Du teilgenommen hast, sind nun einsehbar.',
-	'NOTIFICATION_AP_POLL_OPTIONS_ADDED' => '<strong>Zu einer Umfrage, an der Du teilgenommen hast, wurden neue Optionen hinzugefügt</strong>:',
+	'NOTIFICATION_AP_POLL_ENDED'              => '<strong>Die Ergebnisse sind nun sichtbar für die Umfrage</strong>:',
+	'NOTIFICATION_TYPE_AP_POLL_ENDED'         => 'Die Ergebnisse für eine Umfrage, an der Du teilgenommen hast, sind nun einsehbar.',
+	'NOTIFICATION_AP_POLL_OPTIONS_ADDED'      => '<strong>Zu einer Umfrage, an der Du teilgenommen hast, wurden neue Optionen hinzugefügt</strong>:',
 	'NOTIFICATION_TYPE_AP_POLL_OPTIONS_ADDED' => 'Zu einer Umfrage, an der Du teilgenommen hast, werden neue Optionen hinzugefügt',
-	'LOG_AP_POLL_OPTIONS_ADDED' => '%1$d Option(en) zur Umfrage im Thema „%2$s“ hinzugefügt, ohne vorhandene Stimmen zurückzusetzen',
+	'LOG_AP_POLL_OPTIONS_ADDED'               => '%1$d Option(en) zur Umfrage im Thema „%2$s“ hinzugefügt, ohne vorhandene Stimmen zurückzusetzen',
 ]);

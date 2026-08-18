@@ -35,6 +35,12 @@ services:
             - '@user'
             - '@wolfsblvt.advancedpolls.multi_question_manager'
             - '%core.table_prefix%'
+    wolfsblvt.advancedpolls.poll_status_manager:
+        class: wolfsblvt\advancedpolls\core\poll_status_manager
+        arguments:
+            - '@dbal.conn'
+            - '@auth'
+            - '%core.table_prefix%'
     wolfsblvt.advancedpolls.advancedpolls:
         class: wolfsblvt\advancedpolls\core\advancedpolls
         arguments:
@@ -75,6 +81,7 @@ services:
             - '@request'
             - '@template'
             - '@user'
+            - '@wolfsblvt.advancedpolls.poll_status_manager'
             - '%core.root_path%'
             - '%core.php_ext%'
     wolfsblvt.advancedpolls.notification.type.pollended:

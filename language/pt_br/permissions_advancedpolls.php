@@ -2,7 +2,7 @@
 
 /**
  * Advanced Polls [English]
- * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ * @copyright (c) 2015 Wolfsblvt
  * @copyright (c) 2026 Leinad4Mind
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)

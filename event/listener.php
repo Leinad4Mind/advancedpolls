@@ -3,7 +3,7 @@
  *
  * Advanced Polls
  *
- * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ * @copyright (c) 2015 Wolfsblvt
  * @copyright (c) 2026 Leinad4Mind
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)
@@ -88,20 +88,20 @@ class listener implements EventSubscriberInterface
 	 */
 	public static function getSubscribedEvents()
 	{
-		return array(
-			'core.permissions'								=> 'adv_polls_permissions',				// permissions
-			'core.user_setup'								=> 'load_language_on_setup',			// language for notifications
-			'core.page_header'								=> 'add_poll_list_link',				// global poll directory
-			'core.delete_user_before'						=> 'delete_user_before',				// retain or remove poll votes
-			'core.delete_topics_before_query'			=> 'delete_topics_before',				// remove multi-page data
-			'core.posting_modify_submission_errors'			=> 'check_config_for_polls',			// posting check before saving
-			'core.posting_modify_template_vars'				=> 'config_for_polls_to_template',		// posting to template
-			'core.submit_post_modify_sql_data'				=> 'save_config_for_polls',				// posting to db
-			'core.submit_post_end'							=> 'save_multi_questions',				// additional poll pages
-			'core.viewtopic_modify_poll_data'				=> 'do_poll_voting_modifications',		// viewtopic to db
-			'core.viewtopic_modify_poll_ajax_data'		=> 'do_poll_ajax_modifications',			// redact hidden AJAX results
-			'core.viewtopic_modify_poll_template_data'		=> 'do_poll_template_modifications',	// viewtopic to template
-		);
+		return [
+			'core.permissions'                         => 'adv_polls_permissions',				// permissions
+			'core.user_setup'                          => 'load_language_on_setup',			// language for notifications
+			'core.page_header'                         => 'add_poll_list_link',				// global poll directory
+			'core.delete_user_before'                  => 'delete_user_before',				// retain or remove poll votes
+			'core.delete_topics_before_query'          => 'delete_topics_before',				// remove multi-page data
+			'core.posting_modify_submission_errors'    => 'check_config_for_polls',			// posting check before saving
+			'core.posting_modify_template_vars'        => 'config_for_polls_to_template',		// posting to template
+			'core.submit_post_modify_sql_data'         => 'save_config_for_polls',				// posting to db
+			'core.submit_post_end'                     => 'save_multi_questions',				// additional poll pages
+			'core.viewtopic_modify_poll_data'          => 'do_poll_voting_modifications',		// viewtopic to db
+			'core.viewtopic_modify_poll_ajax_data'     => 'do_poll_ajax_modifications',			// redact hidden AJAX results
+			'core.viewtopic_modify_poll_template_data' => 'do_poll_template_modifications',	// viewtopic to template
+		];
 	}
 
 	/**
@@ -111,10 +111,10 @@ class listener implements EventSubscriberInterface
 	 */
 	public function add_poll_list_link()
 	{
-		$this->template->assign_vars(array(
+		$this->template->assign_vars([
 			'S_AP_POLL_LIST_NAVBAR' => !empty($this->config['wolfsblvt.advancedpolls.show_poll_list_navbar']),
-			'U_AP_POLL_LIST' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list'),
-		));
+			'U_AP_POLL_LIST'        => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list'),
+		]);
 	}
 
 	/**
@@ -153,10 +153,10 @@ class listener implements EventSubscriberInterface
 	 */
 	public function adv_polls_permissions($event)
 	{
-		$permissions = array_merge($event['permissions'], array(
-				'f_seevoters'		=> array('lang' => 'ACL_F_SEEVOTERS', 'cat' => 'polls'),
-				'm_seevoters'		=> array('lang' => 'ACL_M_SEEVOTERS', 'cat' => 'misc'),
-			));
+		$permissions = array_merge($event['permissions'], [
+				'f_seevoters' => ['lang' => 'ACL_F_SEEVOTERS', 'cat' => 'polls'],
+				'm_seevoters' => ['lang' => 'ACL_M_SEEVOTERS', 'cat' => 'misc'],
+			]);
 		$event['permissions'] = $permissions;
 	}
 
@@ -169,10 +169,10 @@ class listener implements EventSubscriberInterface
 	public function load_language_on_setup($event)
 	{
 		$lang_set_ext = $event['lang_set_ext'];
-		$lang_set_ext[] = array(
+		$lang_set_ext[] = [
 			'ext_name' => 'wolfsblvt/advancedpolls',
-			'lang_set' => array('advancedpolls', 'advancedpolls_common'),
-		);
+			'lang_set' => ['advancedpolls', 'advancedpolls_common'],
+		];
 		$event['lang_set_ext'] = $lang_set_ext;
 	}
 
@@ -188,6 +188,10 @@ class listener implements EventSubscriberInterface
 
 		if ($event['submit'] && isset($poll['poll_title']) && $poll['poll_title'])
 		{
+			if (isset($event['post_data']['wolfsblvt_poll_scheduled_start']))
+			{
+				$poll['wolfsblvt_poll_scheduled_start'] = (int) $event['post_data']['wolfsblvt_poll_scheduled_start'];
+			}
 			$error = $this->advancedpolls->check_config_for_polls($poll);
 			if (!$error)
 			{
@@ -249,7 +253,7 @@ class listener implements EventSubscriberInterface
 		}
 		else
 		{
-			$json = json_encode($topic_id ? $this->multi_question_manager->load($topic_id) : array());
+			$json = json_encode($topic_id ? $this->multi_question_manager->load($topic_id) : []);
 		}
 		$page_data['AP_MULTI_QUESTIONS_JSON'] = htmlspecialchars($json ?: '[]', ENT_COMPAT, 'UTF-8');
 		$page_data['AP_CAN_APPEND_OPTIONS'] = $event['mode'] === 'edit'
@@ -285,8 +289,8 @@ class listener implements EventSubscriberInterface
 			return;
 		}
 
-		$poll = isset($event['poll']) ? $event['poll'] : array();
-		$questions = array();
+		$poll = isset($event['poll']) ? $event['poll'] : [];
+		$questions = [];
 		if (!empty($poll['poll_title']))
 		{
 			$decoded = $this->decode_multi_questions($poll);
@@ -325,7 +329,7 @@ class listener implements EventSubscriberInterface
 		if (isset($event['poll']['poll_title']))
 		{
 			$poll = $event['poll'];
-			$editing_topic_poll = in_array($event['post_mode'], array('edit_first_post', 'edit_topic'), true)
+			$editing_topic_poll = in_array($event['post_mode'], ['edit_first_post', 'edit_topic'], true)
 				&& isset($event['data']['post_id'], $event['data']['topic_first_post_id'])
 				&& (int) $event['data']['post_id'] === (int) $event['data']['topic_first_post_id'];
 			if ($this->request->is_set_post('ap_append_poll_options') && $editing_topic_poll)
@@ -334,7 +338,7 @@ class listener implements EventSubscriberInterface
 				$append = $this->poll_option_appender->prepare(
 					(int) $event['data']['topic_id'],
 					$poll,
-					$multi['error'] ? array() : $multi['questions'],
+					$multi['error'] ? [] : $multi['questions'],
 					$this->request->variable('wolfsblvt_poll_vote_mode', \wolfsblvt\advancedpolls\core\poll_options::VOTE_MODE_NO_CHANGE)
 				);
 				if (!$append['error'])
@@ -442,7 +446,10 @@ class listener implements EventSubscriberInterface
 			$poll_template_data = $event['poll_template_data'];
 			$poll_options_template_data = $event['poll_options_template_data'];
 			$this->advancedpolls->do_poll_template_modifications($topic_data, $vote_counts, $poll_info, $poll_template_data, $poll_options_template_data);
-			$this->add_multi_questions_to_template($topic_data, $poll_template_data);
+			if (!empty($poll_template_data['S_HAS_POLL']))
+			{
+				$this->add_multi_questions_to_template($topic_data, $poll_template_data);
+			}
 			$event['poll_template_data'] = $poll_template_data;
 			$event['poll_options_template_data'] = $poll_options_template_data;
 		}
@@ -477,7 +484,7 @@ class listener implements EventSubscriberInterface
 		$show_voters = !empty($topic_data['wolfsblvt_poll_voters_show'])
 			&& !empty($poll_template_data['S_DISPLAY_RESULTS'])
 			&& $this->auth->acl_get('f_seevoters', (int) $topic_data['forum_id']);
-		$voters = $show_voters ? $this->multi_question_manager->load_voters(array_column($questions, 'id')) : array();
+		$voters = $show_voters ? $this->multi_question_manager->load_voters(array_column($questions, 'id')) : [];
 		$type = isset($topic_data['wolfsblvt_poll_type']) ? (int) $topic_data['wolfsblvt_poll_type'] : \wolfsblvt\advancedpolls\core\poll_options::TYPE_CHOICE;
 		$rank_points = \wolfsblvt\advancedpolls\core\ranked_vote::normalise_points(isset($topic_data['wolfsblvt_poll_rank_points']) ? $topic_data['wolfsblvt_poll_rank_points'] : '');
 		$score_result = isset($topic_data['wolfsblvt_poll_score_result']) ? (int) $topic_data['wolfsblvt_poll_score_result'] : \wolfsblvt\advancedpolls\core\poll_options::SCORE_RESULT_TOTAL;
@@ -493,8 +500,8 @@ class listener implements EventSubscriberInterface
 					if ($type === \wolfsblvt\advancedpolls\core\poll_options::TYPE_SCORING
 						&& $score_result === \wolfsblvt\advancedpolls\core\poll_options::SCORE_RESULT_AVERAGE)
 					{
-						$left_scores = isset($distributions[$question_id][$left['id']]) ? $distributions[$question_id][$left['id']] : array();
-						$right_scores = isset($distributions[$question_id][$right['id']]) ? $distributions[$question_id][$right['id']] : array();
+						$left_scores = isset($distributions[$question_id][$left['id']]) ? $distributions[$question_id][$left['id']] : [];
+						$right_scores = isset($distributions[$question_id][$right['id']]) ? $distributions[$question_id][$right['id']] : [];
 						$left_value = \wolfsblvt\advancedpolls\core\poll_options::score_average($left_value, array_sum($left_scores));
 						$right_value = \wolfsblvt\advancedpolls\core\poll_options::score_average($right_value, array_sum($right_scores));
 					}
@@ -504,7 +511,7 @@ class listener implements EventSubscriberInterface
 			unset($ordered_question);
 		}
 		$poll_template_data['AP_HAS_MULTI_QUESTIONS'] = true;
-		$poll_template_data['AP_MULTI_VOTE_URL'] = $this->controller_helper->route('wolfsblvt_advancedpolls_multi_question_vote', array('topic_id' => (int) $topic_data['topic_id']));
+		$poll_template_data['AP_MULTI_VOTE_URL'] = $this->controller_helper->route('wolfsblvt_advancedpolls_multi_question_vote', ['topic_id' => (int) $topic_data['topic_id']]);
 		$poll_template_data['AP_MULTI_TYPE'] = $type;
 		$poll_template_data['AP_MULTI_MAX_OPTIONS'] = (int) $topic_data['poll_max_options'];
 		$poll_template_data['AP_MULTI_TOTAL_VALUE'] = (int) $topic_data['wolfsblvt_poll_total_value'];
@@ -517,14 +524,14 @@ class listener implements EventSubscriberInterface
 
 		foreach ($questions as $question_index => $question)
 		{
-			$this->template->assign_block_vars('ap_question', array(
-				'ID' => (int) $question['id'],
-				'NUMBER' => $question_index + 2,
-				'TEXT' => htmlspecialchars(censor_text($question['text']), ENT_QUOTES, 'UTF-8'),
-				'REQUIRED' => $question['required'],
-				'S_CAN_VOTE' => !empty($poll_template_data['S_CAN_VOTE']),
+			$this->template->assign_block_vars('ap_question', [
+				'ID'                => (int) $question['id'],
+				'NUMBER'            => $question_index + 2,
+				'TEXT'              => htmlspecialchars(censor_text($question['text']), ENT_QUOTES, 'UTF-8'),
+				'REQUIRED'          => $question['required'],
+				'S_CAN_VOTE'        => !empty($poll_template_data['S_CAN_VOTE']),
 				'S_DISPLAY_RESULTS' => !empty($poll_template_data['S_DISPLAY_RESULTS']),
-			));
+			]);
 			$total = array_sum(array_column($question['options'], 'total'));
 			foreach ($question['options'] as $option)
 			{
@@ -538,9 +545,9 @@ class listener implements EventSubscriberInterface
 					}
 				}
 				$rank = array_search($value, $rank_points, true);
-				$voter_names = array();
+				$voter_names = [];
 				$guest_votes = 0;
-				foreach (isset($voters[$question['id']][$option['id']]) ? $voters[$question['id']][$option['id']] : array() as $voter)
+				foreach (isset($voters[$question['id']][$option['id']]) ? $voters[$question['id']][$option['id']] : [] as $voter)
 				{
 					if ((int) $voter['vote_user_id'] === ANONYMOUS)
 					{
@@ -556,8 +563,8 @@ class listener implements EventSubscriberInterface
 				{
 					$voter_names[] = $this->user->lang('AP_GUEST_VOTES', $guest_votes);
 				}
-				$breakdown = array();
-				$option_distribution = isset($distributions[$question['id']][$option['id']]) ? $distributions[$question['id']][$option['id']] : array();
+				$breakdown = [];
+				$option_distribution = isset($distributions[$question['id']][$option['id']]) ? $distributions[$question['id']][$option['id']] : [];
 				ksort($option_distribution, SORT_NUMERIC);
 				foreach ($option_distribution as $score => $voters)
 				{
@@ -575,23 +582,23 @@ class listener implements EventSubscriberInterface
 					? min(100, max(0, (int) round(100 * $average / (int) $topic_data['wolfsblvt_poll_max_value'])))
 					: ($total ? round(100 * (int) $option['total'] / $total) : 0);
 				$display_total = $average_mode ? $formatted_average : (int) $option['total'];
-				$this->template->assign_block_vars('ap_question.option', array(
-					'ID' => (int) $option['id'],
-					'TEXT' => htmlspecialchars(censor_text($option['text']), ENT_QUOTES, 'UTF-8'),
-					'TOTAL' => $display_total,
-					'PERCENT' => $bar_percent,
-					'SHOW_PERCENT' => !$average_mode || $show_percent,
-					'VALUE' => $value,
-					'SELECTED' => $value > 0,
-					'RANK' => $rank === false ? 0 : $rank + 1,
+				$this->template->assign_block_vars('ap_question.option', [
+					'ID'            => (int) $option['id'],
+					'TEXT'          => htmlspecialchars(censor_text($option['text']), ENT_QUOTES, 'UTF-8'),
+					'TOTAL'         => $display_total,
+					'PERCENT'       => $bar_percent,
+					'SHOW_PERCENT'  => !$average_mode || $show_percent,
+					'VALUE'         => $value,
+					'SELECTED'      => $value > 0,
+					'RANK'          => $rank === false ? 0 : $rank + 1,
 					'SCORE_OPTIONS' => $score_options,
-					'SCORE_TOTAL' => $average_mode
+					'SCORE_TOTAL'   => $average_mode
 						? $this->user->lang('AP_SCORE_AVERAGE', $formatted_average, (int) $topic_data['wolfsblvt_poll_max_value'])
 						: $this->user->lang($type === \wolfsblvt\advancedpolls\core\poll_options::TYPE_RANKING ? 'AP_RANK_TOTAL' : 'AP_SCORE_TOTAL', (int) $option['total']),
 					'BREAKDOWN_LABEL' => $this->user->lang[$type === \wolfsblvt\advancedpolls\core\poll_options::TYPE_RANKING ? 'AP_RANK_BREAKDOWN' : 'AP_SCORE_BREAKDOWN'],
-					'BREAKDOWN' => implode('<br />', $breakdown),
-					'VOTERS' => implode($this->user->lang['COMMA_SEPARATOR'], $voter_names),
-				));
+					'BREAKDOWN'       => implode('<br />', $breakdown),
+					'VOTERS'          => implode($this->user->lang['COMMA_SEPARATOR'], $voter_names),
+				]);
 			}
 		}
 	}
@@ -630,6 +637,7 @@ class listener implements EventSubscriberInterface
 	{
 		if ((int) $topic_data['wolfsblvt_poll_vote_mode'] !== \wolfsblvt\advancedpolls\core\poll_options::VOTE_MODE_INCREMENTAL
 			|| !empty($this->user->data['is_bot'])
+			|| (!empty($topic_data['wolfsblvt_poll_scheduled_start']) && (int) $topic_data['wolfsblvt_poll_scheduled_start'] > time())
 			|| !$this->auth->acl_get('f_vote', (int) $topic_data['forum_id'])
 			|| (int) $topic_data['forum_status'] === ITEM_LOCKED
 			|| ((int) $topic_data['topic_status'] === ITEM_LOCKED && empty($this->config['wolfsblvt.advancedpolls.activate_closed_voting']))
@@ -638,16 +646,16 @@ class listener implements EventSubscriberInterface
 			return false;
 		}
 
-		$definitions = array(array(
-			'id' => 'primary',
+		$definitions = [[
+			'id'         => 'primary',
 			'option_ids' => array_map('intval', array_column($poll_info, 'poll_option_id')),
-		));
+		]];
 		foreach ($questions as $question)
 		{
-			$definitions[] = array(
-				'id' => (string) $question['id'],
+			$definitions[] = [
+				'id'         => (string) $question['id'],
 				'option_ids' => array_map('intval', array_column($question['options'], 'id')),
-			);
+			];
 		}
 		$current = $this->multi_question_manager->load_votes(
 			(int) $topic_data['topic_id'],
@@ -659,13 +667,13 @@ class listener implements EventSubscriberInterface
 			(int) $this->user->data['user_id'],
 			$guest_hash
 		);
-		$rules = array(
-			'type' => isset($topic_data['wolfsblvt_poll_type']) ? (int) $topic_data['wolfsblvt_poll_type'] : \wolfsblvt\advancedpolls\core\poll_options::TYPE_CHOICE,
+		$rules = [
+			'type'        => isset($topic_data['wolfsblvt_poll_type']) ? (int) $topic_data['wolfsblvt_poll_type'] : \wolfsblvt\advancedpolls\core\poll_options::TYPE_CHOICE,
 			'max_options' => (int) $topic_data['poll_max_options'],
-			'min_value' => isset($topic_data['wolfsblvt_poll_min_value']) ? (int) $topic_data['wolfsblvt_poll_min_value'] : 1,
-			'max_value' => (int) $topic_data['wolfsblvt_poll_max_value'],
+			'min_value'   => isset($topic_data['wolfsblvt_poll_min_value']) ? (int) $topic_data['wolfsblvt_poll_min_value'] : 1,
+			'max_value'   => (int) $topic_data['wolfsblvt_poll_max_value'],
 			'total_value' => (int) $topic_data['wolfsblvt_poll_total_value'],
-		);
+		];
 
 		return \wolfsblvt\advancedpolls\core\multi_question_vote::can_add_votes($definitions, $current, $rules);
 	}

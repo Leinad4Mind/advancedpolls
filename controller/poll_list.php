@@ -11,6 +11,8 @@
 namespace wolfsblvt\advancedpolls\controller;
 
 use wolfsblvt\advancedpolls\core\poll_options;
+use wolfsblvt\advancedpolls\core\poll_status_manager;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Display approved polls from forums accessible to the current viewer.
@@ -25,10 +27,11 @@ class poll_list
 	protected $request;
 	protected $template;
 	protected $user;
+	protected $poll_status_manager;
 	protected $root_path;
 	protected $php_ext;
 
-	public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\controller\helper $controller_helper, \phpbb\pagination $pagination, \phpbb\request\request_interface $request, \phpbb\template\template $template, \phpbb\user $user, $root_path, $php_ext)
+	public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\controller\helper $controller_helper, \phpbb\pagination $pagination, \phpbb\request\request_interface $request, \phpbb\template\template $template, \phpbb\user $user, poll_status_manager $poll_status_manager, $root_path, $php_ext)
 	{
 		$this->db = $db;
 		$this->auth = $auth;
@@ -38,6 +41,7 @@ class poll_list
 		$this->request = $request;
 		$this->template = $template;
 		$this->user = $user;
+		$this->poll_status_manager = $poll_status_manager;
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 	}
@@ -61,6 +65,7 @@ class poll_list
 		$now = time();
 		$where = array(
 			"t.poll_title <> ''",
+			'(t.wolfsblvt_poll_scheduled_start = 0 OR t.wolfsblvt_poll_scheduled_start <= ' . $now . ')',
 			't.topic_visibility = ' . ITEM_APPROVED,
 			't.topic_moved_id = 0',
 			"f.forum_password = ''",
@@ -94,7 +99,7 @@ class poll_list
 
 		$sql = 'SELECT t.topic_id, t.forum_id, t.topic_title, t.topic_first_post_id,
 				t.poll_title, t.poll_start, t.poll_length, t.poll_max_options,
-				t.wolfsblvt_poll_visibility, t.wolfsblvt_poll_type,
+				t.wolfsblvt_poll_visibility, t.wolfsblvt_poll_type, t.wolfsblvt_poll_vote_mode,
 				t.wolfsblvt_poll_score_result, t.wolfsblvt_poll_max_value,
 				f.forum_name, p.bbcode_uid, p.bbcode_bitfield
 			FROM ' . TOPICS_TABLE . ' t
@@ -109,17 +114,26 @@ class poll_list
 			$topics[(int) $row['topic_id']] = $row;
 		}
 		$this->db->sql_freeresult($result);
-		$leaders = $this->load_visible_leaders($topics, $now);
+		$manageable = array();
+		foreach ($topics as $topic_id => $topic)
+		{
+			$manageable[$topic_id] = $this->poll_status_manager->can_manage((int) $topic['forum_id']);
+		}
+		$participation = $this->load_participation(array_keys($topics));
+		$leaders = $this->load_visible_leaders($topics, $now, $participation, $manageable);
+		$can_manage_any = in_array(true, $manageable, true);
 
 		foreach ($topics as $topic_id => $topic)
 		{
 			$ended = !empty($topic['poll_length']) && (int) $topic['poll_start'] + (int) $topic['poll_length'] <= $now;
 			$flags = ($topic['bbcode_bitfield'] ? OPTION_FLAG_BBCODE : 0) | OPTION_FLAG_SMILIES;
 			$leader = isset($leaders[$topic_id]) ? $leaders[$topic_id] : false;
+			$can_manage = !empty($manageable[$topic_id]);
 			$this->template->assign_block_vars('poll', array(
-				'TOPIC_TITLE' => htmlspecialchars(censor_text($topic['topic_title']), ENT_QUOTES, 'UTF-8'),
+				'TOPIC_ID' => $topic_id,
+				'TOPIC_TITLE' => censor_text($topic['topic_title']),
 				'POLL_TITLE' => generate_text_for_display($topic['poll_title'], $topic['bbcode_uid'], $topic['bbcode_bitfield'], $flags, true),
-				'FORUM_NAME' => htmlspecialchars(censor_text($topic['forum_name']), ENT_QUOTES, 'UTF-8'),
+				'FORUM_NAME' => censor_text($topic['forum_name']),
 				'STATUS' => $this->user->lang[$ended ? 'AP_POLL_LIST_CLOSED' : 'AP_POLL_LIST_OPEN'],
 				'DATE_TEXT' => !empty($topic['poll_length'])
 					? $this->user->lang(
@@ -127,8 +141,9 @@ class poll_list
 						$this->user->format_date((int) $topic['poll_start'] + (int) $topic['poll_length'])
 					)
 					: '',
-				'RESULT_SUMMARY' => $leader ? $this->format_leader($leader, $topic, $flags) : '',
+				'RESULT_SUMMARY' => $leader ? $this->format_leader($leader, $topic, $flags, $ended) : '',
 				'S_ENDED' => $ended,
+				'S_CAN_MANAGE' => $can_manage,
 				'U_TOPIC' => append_sid("{$this->root_path}viewtopic.{$this->php_ext}", 'f=' . (int) $topic['forum_id'] . '&amp;t=' . $topic_id),
 				'U_FORUM' => append_sid("{$this->root_path}viewforum.{$this->php_ext}", 'f=' . (int) $topic['forum_id']),
 			));
@@ -136,9 +151,17 @@ class poll_list
 
 		$base_url = $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list', $filter === 'all' ? array() : array('status' => $filter));
 		$this->pagination->generate_template_pagination($base_url, 'pagination', 'start', $total, $limit, $start);
+		if ($can_manage_any)
+		{
+			add_form_key('advancedpolls_manage');
+		}
 		$this->template->assign_vars(array(
-			'AP_POLL_COUNT' => $total,
+			'S_AP_POLL_LIST_PAGE' => true,
+			'AP_POLL_COUNT' => sprintf('%d %s', $total, $this->user->lang['AP_POLL_LIST']),
 			'AP_POLL_FILTER' => $filter,
+			'AP_POLL_START' => $start,
+			'S_AP_CAN_MANAGE' => $can_manage_any,
+			'U_AP_POLL_MANAGE' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_manage'),
 			'U_AP_POLL_LIST_ALL' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list'),
 			'U_AP_POLL_LIST_OPEN' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list', array('status' => 'open')),
 			'U_AP_POLL_LIST_CLOSED' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list', array('status' => 'closed')),
@@ -147,19 +170,97 @@ class poll_list
 	}
 
 	/**
+	 * Close or reopen selected polls, then return to the current list page.
+	 *
+	 * @return RedirectResponse
+	 */
+	public function manage()
+	{
+		$this->user->add_lang_ext('wolfsblvt/advancedpolls', 'advancedpolls');
+		if (!check_form_key('advancedpolls_manage'))
+		{
+			trigger_error('FORM_INVALID');
+		}
+
+		$action = $this->request->variable('manage_action', '');
+		$topic_ids = $this->request->variable('poll_ids', array(0));
+		$this->poll_status_manager->change_status($topic_ids, $action, time());
+
+		$filter = $this->request->variable('status', 'all');
+		if (!in_array($filter, array('all', 'open', 'closed'), true))
+		{
+			$filter = 'all';
+		}
+		$params = array();
+		if ($filter !== 'all')
+		{
+			$params['status'] = $filter;
+		}
+		$start = max(0, $this->request->variable('start', 0));
+		if ($start)
+		{
+			$params['start'] = $start;
+		}
+
+		return new RedirectResponse($this->controller_helper->route('wolfsblvt_advancedpolls_poll_list', $params, false));
+	}
+
+	/**
+	 * Load the current registered viewer's vote count per topic.
+	 *
+	 * @param array $topic_ids Topic IDs on the current page
+	 * @return array
+	 */
+	protected function load_participation(array $topic_ids)
+	{
+		if (!$topic_ids || empty($this->user->data['is_registered']))
+		{
+			return array();
+		}
+
+		$sql = 'SELECT topic_id, COUNT(*) AS vote_count
+			FROM ' . POLL_VOTES_TABLE . '
+			WHERE ' . $this->db->sql_in_set('topic_id', array_map('intval', $topic_ids)) . '
+				AND vote_user_id = ' . (int) $this->user->data['user_id'] . '
+			GROUP BY topic_id';
+		$result = $this->db->sql_query($sql);
+		$participation = array();
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$participation[(int) $row['topic_id']] = (int) $row['vote_count'];
+		}
+		$this->db->sql_freeresult($result);
+
+		return $participation;
+	}
+
+	/**
 	 * Load the leading visible option for each topic without leaking hidden results.
 	 *
 	 * @param array $topics Topic rows keyed by topic ID
 	 * @param int   $now Current timestamp
+	 * @param array $participation Current viewer vote counts keyed by topic ID
+	 * @param array $manageable Whether the viewer may manage each topic
 	 * @return array
 	 */
-	protected function load_visible_leaders(array $topics, $now)
+	protected function load_visible_leaders(array $topics, $now, array $participation, array $manageable)
 	{
 		$visible = array();
 		foreach ($topics as $topic_id => $topic)
 		{
 			$ended = !empty($topic['poll_length']) && (int) $topic['poll_start'] + (int) $topic['poll_length'] <= $now;
-			if ($ended || (int) $topic['wolfsblvt_poll_visibility'] === poll_options::VISIBILITY_PUBLIC)
+			$vote_count = isset($participation[$topic_id]) ? (int) $participation[$topic_id] : 0;
+			$has_voted = $vote_count > 0;
+			$incremental = (int) $topic['wolfsblvt_poll_vote_mode'] === poll_options::VOTE_MODE_INCREMENTAL;
+			$required_votes = max(1, (int) $topic['poll_max_options']);
+			$vote_completed = $has_voted && (!$incremental || $vote_count >= $required_votes);
+			if (!poll_options::results_are_hidden(
+				(int) $topic['wolfsblvt_poll_visibility'],
+				$ended,
+				$has_voted,
+				$vote_completed,
+				!empty($manageable[$topic_id])
+			))
 			{
 				$visible[] = (int) $topic_id;
 			}
@@ -219,9 +320,10 @@ class poll_list
 	 * @param array $leader Leading option
 	 * @param array $topic Topic row
 	 * @param int   $flags Text parsing flags
+	 * @param bool  $ended Whether the poll has ended
 	 * @return string
 	 */
-	protected function format_leader(array $leader, array $topic, $flags)
+	protected function format_leader(array $leader, array $topic, $flags, $ended)
 	{
 		$caption = generate_text_for_display($leader['poll_option_text'], $topic['bbcode_uid'], $topic['bbcode_bitfield'], $flags, true);
 		if ($leader['average_mode'])
@@ -241,6 +343,6 @@ class poll_list
 		{
 			$result = $this->user->lang('AP_SCORE_TOTAL', (int) $leader['value']);
 		}
-		return $this->user->lang('AP_POLL_LIST_LEADING', $caption, $result);
+		return $this->user->lang($ended ? 'AP_POLL_LIST_WINNER' : 'AP_POLL_LIST_LEADING', $caption, $result);
 	}
 }

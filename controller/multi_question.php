@@ -224,7 +224,7 @@ class multi_question
 			wolfsblvt_poll_vote_mode, wolfsblvt_poll_visibility,
 			wolfsblvt_poll_required, wolfsblvt_poll_voters_limit,
 			wolfsblvt_poll_voters_show, wolfsblvt_poll_score_result,
-			wolfsblvt_poll_show_percent
+			wolfsblvt_poll_show_percent, wolfsblvt_poll_scheduled_start
 			FROM ' . TOPICS_TABLE . '
 			WHERE topic_id = ' . (int) $topic_id;
 		$result = $this->db->sql_query($sql);
@@ -245,6 +245,10 @@ class multi_question
 			return false;
 		}
 		if (!empty($topic['poll_length']) && (int) $topic['poll_start'] + (int) $topic['poll_length'] <= time())
+		{
+			return false;
+		}
+		if (!empty($topic['wolfsblvt_poll_scheduled_start']) && (int) $topic['wolfsblvt_poll_scheduled_start'] > time())
 		{
 			return false;
 		}

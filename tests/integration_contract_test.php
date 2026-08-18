@@ -22,6 +22,9 @@ use wolfsblvt\advancedpolls\migrations\v1_4_0_schema;
 use wolfsblvt\advancedpolls\migrations\v1_5_0_schema;
 use wolfsblvt\advancedpolls\migrations\v1_6_0_data;
 use wolfsblvt\advancedpolls\migrations\v1_6_0_schema;
+use wolfsblvt\advancedpolls\migrations\v1_6_1_schema;
+use wolfsblvt\advancedpolls\migrations\v1_7_0_data;
+use wolfsblvt\advancedpolls\migrations\v1_7_0_schema;
 
 class integration_contract_test extends TestCase
 {
@@ -303,6 +306,50 @@ class integration_contract_test extends TestCase
 			array('config.add', array('wolfsblvt.advancedpolls.default_poll_show_percent', 1)),
 			array('config.add', array('wolfsblvt.advancedpolls.show_poll_list_navbar', 1)),
 		), $data_migration->update_data());
+	}
+
+	public function test_v1_6_1_stores_remaining_duration_for_manually_closed_polls()
+	{
+		$migration = $this->create_schema_migration(v1_6_1_schema::class);
+		$columns = $migration->update_schema()['add_columns']['phpbb_topics'];
+
+		$this->assertSame(
+			array('\wolfsblvt\advancedpolls\migrations\v1_6_0_data'),
+			v1_6_1_schema::depends_on()
+		);
+		$this->assertSame(array('UINT', 0), $columns['wolfsblvt_poll_saved_remaining']);
+		$this->assertSame(
+			array('wolfsblvt_poll_saved_remaining'),
+			$migration->revert_schema()['drop_columns']['phpbb_topics']
+		);
+	}
+
+	public function test_v1_7_0_adds_scheduled_poll_start_configuration()
+	{
+		$schema_migration = $this->create_schema_migration(v1_7_0_schema::class);
+		$columns = $schema_migration->update_schema()['add_columns']['phpbb_topics'];
+
+		$this->assertSame(
+			array('\wolfsblvt\advancedpolls\migrations\v1_6_1_schema'),
+			v1_7_0_schema::depends_on()
+		);
+		$this->assertSame(array('UINT', 0), $columns['wolfsblvt_poll_scheduled_start']);
+		$this->assertSame(
+			array('wolfsblvt_poll_scheduled_start'),
+			$schema_migration->revert_schema()['drop_columns']['phpbb_topics']
+		);
+
+		$data_migration = $this->create_schema_migration(v1_7_0_data::class);
+		$this->assertSame(
+			array('\wolfsblvt\advancedpolls\migrations\v1_7_0_schema'),
+			v1_7_0_data::depends_on()
+		);
+		$this->assertSame(array(
+			array('config.add', array('wolfsblvt.advancedpolls.activate_poll_start', 1)),
+		), $data_migration->update_data());
+		$this->assertSame(array(
+			array('config.remove', array('wolfsblvt.advancedpolls.activate_poll_start')),
+		), $data_migration->revert_data());
 	}
 
 	public function test_v1_4_data_enables_collapsible_polls_when_categories_extension_is_installed()

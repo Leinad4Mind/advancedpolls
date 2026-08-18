@@ -2,7 +2,7 @@
 
 /**
  * Advanced Polls [English]
- * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ * @copyright (c) 2015 Wolfsblvt
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)
  * @translation Leinad4Mind [Portuguese [pt]] (2026)
@@ -35,9 +35,9 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, [
-	'NOTIFICATION_AP_POLL_ENDED'      => '<strong>Resultados visíveis para a votação</strong>:',
-	'NOTIFICATION_TYPE_AP_POLL_ENDED' => 'Já podes ver os resultados de uma votação em que participaste',
-	'NOTIFICATION_AP_POLL_OPTIONS_ADDED' => '<strong>Foram adicionadas novas opções a uma votação em que participaste</strong>:',
+	'NOTIFICATION_AP_POLL_ENDED'              => '<strong>Resultados visíveis para a votação</strong>:',
+	'NOTIFICATION_TYPE_AP_POLL_ENDED'         => 'Já podes ver os resultados de uma votação em que participaste',
+	'NOTIFICATION_AP_POLL_OPTIONS_ADDED'      => '<strong>Foram adicionadas novas opções a uma votação em que participaste</strong>:',
 	'NOTIFICATION_TYPE_AP_POLL_OPTIONS_ADDED' => 'São adicionadas novas opções a uma votação em que participaste',
-	'LOG_AP_POLL_OPTIONS_ADDED' => 'Adicionou %1$d opção(ões) à votação no tópico «%2$s» sem repor os votos existentes',
+	'LOG_AP_POLL_OPTIONS_ADDED'               => 'Adicionou %1$d opção(ões) à votação no tópico «%2$s» sem repor os votos existentes',
 ]);

@@ -51,7 +51,7 @@ class infopoll
 
 		$sql = 'SELECT topic_id, forum_id, topic_first_post_id, poll_title, poll_max_options,
 				wolfsblvt_poll_type, wolfsblvt_poll_max_value,
-				wolfsblvt_poll_score_result
+				wolfsblvt_poll_score_result, wolfsblvt_poll_scheduled_start
 			FROM ' . TOPICS_TABLE . '
 			WHERE topic_id = ' . (int) $topic_id;
 		$result = $this->db->sql_query($sql);
@@ -59,6 +59,10 @@ class infopoll
 		$this->db->sql_freeresult($result);
 
 		if (!$topic || !$topic['poll_title'])
+		{
+			return $this->response(array('error' => $this->user->lang['NO_TOPIC']), 404);
+		}
+		if (!empty($topic['wolfsblvt_poll_scheduled_start']) && (int) $topic['wolfsblvt_poll_scheduled_start'] > time())
 		{
 			return $this->response(array('error' => $this->user->lang['NO_TOPIC']), 404);
 		}

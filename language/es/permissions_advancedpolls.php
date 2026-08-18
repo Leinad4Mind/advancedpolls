@@ -3,7 +3,7 @@
  *
  * Advanced Polls [Spanish]
  *
- * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ * @copyright (c) 2015 Wolfsblvt
  * @copyright (c) 2026 Leinad4Mind
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)
@@ -45,6 +45,6 @@ if (empty($lang) || !is_array($lang))
 
 // Forum and moderator permissions
 $lang = array_merge($lang, [
-	'ACL_F_SEEVOTERS'			=> 'Puede ver los votantes de la encuesta',
-	'ACL_M_SEEVOTERS'			=> 'Puede ver los votantes de la encuesta',
+	'ACL_F_SEEVOTERS' => 'Puede ver los votantes de la encuesta',
+	'ACL_M_SEEVOTERS' => 'Puede ver los votantes de la encuesta',
 ]);

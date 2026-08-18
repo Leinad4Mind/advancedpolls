@@ -3,7 +3,7 @@
  *
  * Advanced Polls
  *
- * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ * @copyright (c) 2015 Wolfsblvt
  * @copyright (c) 2026 Leinad4Mind
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)
@@ -19,7 +19,7 @@ class advancedpolls_module
 	public $u_action;
 
 	/** @var \phpbb\config\config */
-	public $new_config = array();
+	public $new_config = [];
 
 	/** @var string form key */
 	public $form_key;
@@ -50,11 +50,11 @@ class advancedpolls_module
 		global $phpbb_container;
 
 		// Initialization
-		$this->config		= $phpbb_container->get('config');
-		$this->db			= $phpbb_container->get('dbal.conn');
-		$this->user			= $phpbb_container->get('user');
-		$this->template		= $phpbb_container->get('template');
-		$this->request		= $phpbb_container->get('request');
+		$this->config = $phpbb_container->get('config');
+		$this->db = $phpbb_container->get('dbal.conn');
+		$this->user = $phpbb_container->get('user');
+		$this->template = $phpbb_container->get('template');
+		$this->request = $phpbb_container->get('request');
 
 		$action = $this->request->variable('action', '', true);
 		$submit = ($this->request->is_set_post('submit')) ? true : false;
@@ -62,33 +62,34 @@ class advancedpolls_module
 		$this->form_key = 'acp_advancedpolls';
 		add_form_key($this->form_key);
 
-		$display_vars = array(
-			'title'	=> 'AP_TITLE_ACP',
-			'vars'	=> array(
-				'legend1'												=> 'AP_GLOBAL_SETTINGS',
-				'wolfsblvt.advancedpolls.activate_closed_voting'		=> array('lang' => 'AP_ACT_CLOSED_VOTING',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.activate_no_vote'				=> array('lang' => 'AP_ACT_POLL_NO_VOTE',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.activate_show_abstainers'		=> array('lang' => 'AP_ACT_SHOW_ABSTAINERS',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.activate_vote_delete'			=> array('lang' => 'AP_ACT_VOTE_DELETE',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.activate_poll_collapsible'	=> array('lang' => 'AP_ACT_POLL_COLLAPSIBLE',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.activate_poll_end'				=> array('lang' => 'AP_ACT_POLL_END',			'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.activate_notifications'		=> array('lang' => 'AP_ACT_POLL_NOTIFICATIONS',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.show_poll_list_navbar'		=> array('lang' => 'AP_SHOW_POLL_LIST_NAVBAR',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'legend2'												=> 'AP_PER_POLL_SETTINGS',
-				'wolfsblvt.advancedpolls.default_poll_visibility'		=> array('lang' => 'AP_DEFAULT_POLL_VISIBILITY',	'validate' => 'int:0:3',	'type' => 'select:1', 'method' => 'select_poll_visibility', 'explain' => true),
-				'wolfsblvt.advancedpolls.default_poll_vote_mode'		=> array('lang' => 'AP_DEFAULT_POLL_VOTE_MODE',	'validate' => 'int:0:2',	'type' => 'select:1', 'method' => 'select_poll_vote_mode', 'explain' => true),
-				'wolfsblvt.advancedpolls.activate_poll_scoring'			=> array('lang' => 'AP_ACT_POLL_SCORING',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.default_poll_score_result'		=> array('lang' => 'AP_DEFAULT_SCORE_RESULT',	'validate' => 'int:0:1',	'type' => 'select:1', 'method' => 'select_score_result', 'explain' => true),
-				'wolfsblvt.advancedpolls.default_poll_show_percent'		=> array('lang' => 'AP_DEFAULT_SHOW_PERCENT',	'validate' => 'bool',		'type' => 'radio:yes_no',	'explain' => true),
-				'wolfsblvt.advancedpolls.activate_poll_voters_show'		=> array('lang' => 'AP_ACT_VOTERS_SHOW',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.default_poll_voters_show'		=> array('lang' => 'AP_DEFAULT_VOTERS_SHOW',	'validate' => 'bool',		'type' => 'radio:yes_no',	'explain' => false),
-				'wolfsblvt.advancedpolls.activate_poll_voters_limit'	=> array('lang' => 'AP_ACT_VOTERS_LIMIT',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.default_poll_voters_limit'		=> array('lang' => 'AP_DEFAULT_VOTERS_LIMIT',	'validate' => 'bool',		'type' => 'radio:yes_no',	'explain' => false),
-				'wolfsblvt.advancedpolls.activate_poll_show_ordered'	=> array('lang' => 'AP_ACT_SHOW_ORDERED',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true),
-				'wolfsblvt.advancedpolls.default_poll_show_ordered'		=> array('lang' => 'AP_DEFAULT_SHOW_ORDERED',	'validate' => 'bool',		'type' => 'radio:yes_no',	'explain' => false),
-				'legend3'												=> 'ACP_SUBMIT_CHANGES'
-			),
-		);
+		$display_vars = [
+			'title' => 'AP_TITLE_ACP',
+			'vars'  => [
+				'legend1'                                            => 'AP_GLOBAL_SETTINGS',
+				'wolfsblvt.advancedpolls.activate_closed_voting'     => ['lang' => 'AP_ACT_CLOSED_VOTING',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.activate_no_vote'           => ['lang' => 'AP_ACT_POLL_NO_VOTE',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.activate_show_abstainers'   => ['lang' => 'AP_ACT_SHOW_ABSTAINERS',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.activate_vote_delete'       => ['lang' => 'AP_ACT_VOTE_DELETE',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.activate_poll_collapsible'  => ['lang' => 'AP_ACT_POLL_COLLAPSIBLE',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.activate_poll_start'        => ['lang' => 'AP_ACT_POLL_START',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.activate_poll_end'          => ['lang' => 'AP_ACT_POLL_END',			'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.activate_notifications'     => ['lang' => 'AP_ACT_POLL_NOTIFICATIONS',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.show_poll_list_navbar'      => ['lang' => 'AP_SHOW_POLL_LIST_NAVBAR',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'legend2'                                            => 'AP_PER_POLL_SETTINGS',
+				'wolfsblvt.advancedpolls.default_poll_visibility'    => ['lang' => 'AP_DEFAULT_POLL_VISIBILITY',	'validate' => 'int:0:3',	'type' => 'select:1', 'method' => 'select_poll_visibility', 'explain' => true],
+				'wolfsblvt.advancedpolls.default_poll_vote_mode'     => ['lang' => 'AP_DEFAULT_POLL_VOTE_MODE',	'validate' => 'int:0:2',	'type' => 'select:1', 'method' => 'select_poll_vote_mode', 'explain' => true],
+				'wolfsblvt.advancedpolls.activate_poll_scoring'      => ['lang' => 'AP_ACT_POLL_SCORING',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.default_poll_score_result'  => ['lang' => 'AP_DEFAULT_SCORE_RESULT',	'validate' => 'int:0:1',	'type' => 'select:1', 'method' => 'select_score_result', 'explain' => true],
+				'wolfsblvt.advancedpolls.default_poll_show_percent'  => ['lang' => 'AP_DEFAULT_SHOW_PERCENT',	'validate' => 'bool',		'type' => 'radio:yes_no',	'explain' => true],
+				'wolfsblvt.advancedpolls.activate_poll_voters_show'  => ['lang' => 'AP_ACT_VOTERS_SHOW',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.default_poll_voters_show'   => ['lang' => 'AP_DEFAULT_VOTERS_SHOW',	'validate' => 'bool',		'type' => 'radio:yes_no',	'explain' => false],
+				'wolfsblvt.advancedpolls.activate_poll_voters_limit' => ['lang' => 'AP_ACT_VOTERS_LIMIT',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.default_poll_voters_limit'  => ['lang' => 'AP_DEFAULT_VOTERS_LIMIT',	'validate' => 'bool',		'type' => 'radio:yes_no',	'explain' => false],
+				'wolfsblvt.advancedpolls.activate_poll_show_ordered' => ['lang' => 'AP_ACT_SHOW_ORDERED',		'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.default_poll_show_ordered'  => ['lang' => 'AP_DEFAULT_SHOW_ORDERED',	'validate' => 'bool',		'type' => 'radio:yes_no',	'explain' => false],
+				'legend3'                                            => 'ACP_SUBMIT_CHANGES'
+			],
+		];
 
 		#region Submit
 		if ($submit)
@@ -119,12 +120,12 @@ class advancedpolls_module
 	 */
 	public function select_poll_visibility($value, $key)
 	{
-		return $this->select_options(array(
-			poll_options::VISIBILITY_PUBLIC => 'AP_VISIBILITY_PUBLIC',
-			poll_options::VISIBILITY_DEFAULT => 'AP_VISIBILITY_DEFAULT',
+		return $this->select_options([
+			poll_options::VISIBILITY_PUBLIC         => 'AP_VISIBILITY_PUBLIC',
+			poll_options::VISIBILITY_DEFAULT        => 'AP_VISIBILITY_DEFAULT',
 			poll_options::VISIBILITY_VOTE_COMPLETED => 'AP_VISIBILITY_VOTE_COMPLETED',
-			poll_options::VISIBILITY_PRIVATE => 'AP_VISIBILITY_PRIVATE',
-		), $value);
+			poll_options::VISIBILITY_PRIVATE        => 'AP_VISIBILITY_PRIVATE',
+		], $value);
 	}
 
 	/**
@@ -136,11 +137,11 @@ class advancedpolls_module
 	 */
 	public function select_poll_vote_mode($value, $key)
 	{
-		return $this->select_options(array(
-			poll_options::VOTE_MODE_NO_CHANGE => 'AP_VOTE_MODE_NO_CHANGE',
+		return $this->select_options([
+			poll_options::VOTE_MODE_NO_CHANGE   => 'AP_VOTE_MODE_NO_CHANGE',
 			poll_options::VOTE_MODE_INCREMENTAL => 'AP_VOTE_MODE_INCREMENTAL',
-			poll_options::VOTE_MODE_CHANGE => 'AP_VOTE_MODE_CHANGE',
-		), $value);
+			poll_options::VOTE_MODE_CHANGE      => 'AP_VOTE_MODE_CHANGE',
+		], $value);
 	}
 
 	/**
@@ -152,10 +153,10 @@ class advancedpolls_module
 	 */
 	public function select_score_result($value, $key)
 	{
-		return $this->select_options(array(
-			poll_options::SCORE_RESULT_TOTAL => 'AP_SCORE_RESULT_TOTAL',
+		return $this->select_options([
+			poll_options::SCORE_RESULT_TOTAL   => 'AP_SCORE_RESULT_TOTAL',
 			poll_options::SCORE_RESULT_AVERAGE => 'AP_SCORE_RESULT_AVERAGE',
-		), $value);
+		], $value);
 	}
 
 	/**
@@ -184,11 +185,11 @@ class advancedpolls_module
 	 * @param array $special_functions Assoziative Array with config values where special functions should run on submit instead of simply save the config value. Array should contain 'config_value' => function ($this) { function code here }, or 'config_value' => null if no function should run.
 	 * @return bool Submit valid or not.
 	 */
-	protected function do_submit_stuff($display_vars, $special_functions = array())
+	protected function do_submit_stuff($display_vars, $special_functions = [])
 	{
 		$this->new_config = $this->config;
-		$cfg_array = ($this->request->is_set('config')) ? $this->request->variable('config', array('' => '')) : $this->new_config;
-		$error = isset($error) ? $error : array();
+		$cfg_array = ($this->request->is_set('config')) ? $this->request->variable('config', ['' => '']) : $this->new_config;
+		$error = isset($error) ? $error : [];
 
 		validate_config_vars($display_vars['vars'], $cfg_array, $error);
 
@@ -243,8 +244,8 @@ class advancedpolls_module
 	protected function generate_stuff_for_cfg_template($display_vars)
 	{
 		$this->new_config = $this->config;
-		$cfg_array = ($this->request->is_set('config')) ? $this->request->variable('config', array('' => '')) : $this->new_config;
-		$error = isset($error) ? $error : array();
+		$cfg_array = ($this->request->is_set('config')) ? $this->request->variable('config', ['' => '']) : $this->new_config;
+		$error = isset($error) ? $error : [];
 
 		validate_config_vars($display_vars['vars'], $cfg_array, $error);
 
@@ -257,9 +258,9 @@ class advancedpolls_module
 
 			if (strpos($config_key, 'legend') !== false)
 			{
-				$this->template->assign_block_vars('options', array(
-					'S_LEGEND'		=> true,
-					'LEGEND'		=> (isset($this->user->lang[$vars])) ? $this->user->lang[$vars] : $vars)
+				$this->template->assign_block_vars('options', [
+					'S_LEGEND' => true,
+					'LEGEND'   => (isset($this->user->lang[$vars])) ? $this->user->lang[$vars] : $vars]
 				);
 
 				continue;
@@ -284,20 +285,20 @@ class advancedpolls_module
 				continue;
 			}
 
-			$this->template->assign_block_vars('options', array(
-				'KEY'				=> $config_key,
-				'TITLE'				=> (isset($this->user->lang[$vars['lang']])) ? $this->user->lang[$vars['lang']] : $vars['lang'],
-				'S_EXPLAIN'			=> $vars['explain'],
-				'TITLE_EXPLAIN'		=> $l_explain,
-				'CONTENT'			=> $content,
-			));
+			$this->template->assign_block_vars('options', [
+				'KEY'           => $config_key,
+				'TITLE'         => (isset($this->user->lang[$vars['lang']])) ? $this->user->lang[$vars['lang']] : $vars['lang'],
+				'S_EXPLAIN'     => $vars['explain'],
+				'TITLE_EXPLAIN' => $l_explain,
+				'CONTENT'       => $content,
+			]);
 		}
 
-		$this->template->assign_vars(array(
-			'S_ERROR'			=> (sizeof($error)) ? true : false,
-			'ERROR_MSG'			=> implode('<br />', $error),
+		$this->template->assign_vars([
+			'S_ERROR'   => (sizeof($error)) ? true : false,
+			'ERROR_MSG' => implode('<br />', $error),
 
-			'U_ACTION'			=> $this->u_action)
+			'U_ACTION' => $this->u_action]
 		);
 	}
 }

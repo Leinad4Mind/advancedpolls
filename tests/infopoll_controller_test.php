@@ -66,6 +66,30 @@ class infopoll_controller_test extends TestCase
 		$this->assertSame(array('error' => 'Not authorised'), json_decode($response->getContent(), true));
 	}
 
+	public function test_scheduled_poll_details_are_not_exposed_before_start()
+	{
+		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
+		$db->expects($this->once())->method('sql_query')->willReturn(true);
+		$db->expects($this->once())->method('sql_fetchrow')->willReturn(array(
+			'topic_id' => 12,
+			'forum_id' => 2,
+			'topic_first_post_id' => 24,
+			'poll_title' => 'Secret future question',
+			'poll_max_options' => 1,
+			'wolfsblvt_poll_scheduled_start' => time() + 3600,
+		));
+		$db->expects($this->once())->method('sql_freeresult')->with(true);
+		$auth = $this->createMock(\phpbb\auth\auth::class);
+		$auth->expects($this->never())->method('acl_get');
+		$request = $this->createMock(\phpbb\request\request_interface::class);
+		$request->method('is_ajax')->willReturn(true);
+
+		$response = (new infopoll($db, $auth, $this->user(), $request))->details(12);
+
+		$this->assertSame(404, $response->getStatusCode());
+		$this->assertSame(array('error' => 'No topic'), json_decode($response->getContent(), true));
+	}
+
 	private function user()
 	{
 		$user = $this->createMock(\phpbb\user::class);

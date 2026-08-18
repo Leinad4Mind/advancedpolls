@@ -3,7 +3,7 @@
  *
  * Advanced Polls [Polish]
  * Polish translation by Lech-u (https://www.phpbb.com/community/memberlist.php?mode=viewprofile&u=1616616)*
- * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ * @copyright (c) 2015 Wolfsblvt
  * @copyright (c) 2026 Leinad4Mind
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)
@@ -36,9 +36,9 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, [
-	'NOTIFICATION_AP_POLL_ENDED'		=> '<strong>Wyniki będą widoczne w ankiecie</strong>:',
-	'NOTIFICATION_TYPE_AP_POLL_ENDED'	=> 'Wyniki są teraz widoczne dla ankiety, w której głosowałeś',
-	'NOTIFICATION_AP_POLL_OPTIONS_ADDED' => '<strong>Dodano nowe opcje do ankiety, w której głosowałeś</strong>:',
+	'NOTIFICATION_AP_POLL_ENDED'              => '<strong>Wyniki będą widoczne w ankiecie</strong>:',
+	'NOTIFICATION_TYPE_AP_POLL_ENDED'         => 'Wyniki są teraz widoczne dla ankiety, w której głosowałeś',
+	'NOTIFICATION_AP_POLL_OPTIONS_ADDED'      => '<strong>Dodano nowe opcje do ankiety, w której głosowałeś</strong>:',
 	'NOTIFICATION_TYPE_AP_POLL_OPTIONS_ADDED' => 'Do ankiety, w której głosowałeś, zostają dodane nowe opcje',
-	'LOG_AP_POLL_OPTIONS_ADDED' => 'Dodano %1$d opcje do ankiety w temacie „%2$s” bez resetowania istniejących głosów',
+	'LOG_AP_POLL_OPTIONS_ADDED'               => 'Dodano %1$d opcje do ankiety w temacie „%2$s” bez resetowania istniejących głosów',
 ]);

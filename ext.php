@@ -3,7 +3,7 @@
  *
  * Advanced Polls
  *
- * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ * @copyright (c) 2015 Wolfsblvt
  * @copyright (c) 2026 Leinad4Mind
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)
@@ -70,7 +70,7 @@ class ext extends \phpbb\extension\base
 	protected function append_enable_notice()
 	{
 		$language = $this->container->get('language');
-		$language->add_lang(array('info_acp_advancedpolls', 'permissions_advancedpolls'), 'wolfsblvt/advancedpolls');
+		$language->add_lang(['info_acp_advancedpolls', 'permissions_advancedpolls'], 'wolfsblvt/advancedpolls');
 
 		if (!$language->is_set('AP_ENABLE_NOTICE') || !$language->is_set('EXTENSION_ENABLE_SUCCESS'))
 		{
@@ -170,9 +170,9 @@ class ext extends \phpbb\extension\base
 	 */
 	protected function notification_types()
 	{
-		return array(
+		return [
 			'wolfsblvt.advancedpolls.notification.type.pollended',
 			'wolfsblvt.advancedpolls.notification.type.optionsadded',
-		);
+		];
 	}
 }

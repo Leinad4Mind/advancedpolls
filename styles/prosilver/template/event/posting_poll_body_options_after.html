@@ -6,6 +6,15 @@
 <!-- ENDIF -->
 <!-- ENDIF -->
 
+<!-- IF WOLFSBLVT_POLL_START -->
+<!-- INCLUDEJS js/poll_start_posting.js -->
+<dl>
+	<dt><label for="wolfsblvt_poll_start">{L_AP_POLL_START}{L_COLON}</label><br /><span>{L_AP_POLL_START_EXPLAIN}</span></dt>
+	<dd><input type="datetime-local" id="wolfsblvt_poll_start" name="wolfsblvt_poll_start" value="{WOLFSBLVT_POLL_START_VALUE}" class="inputbox autowidth" step="60" onfocus="apRefreshPollStartMinimum();" onchange="apAdjustStartDateTime(this.value);" /></dd>
+</dl>
+<hr class="dashed" />
+<!-- ENDIF -->
+
 <!-- IF WOLFSBLVT_POLL_END -->
 	<!-- INCLUDEJS js/poll_length_posting.js -->
 	<div id="ap_poll_length_container" style="display:none;" jxdom-target="label > #poll_length" jxdom-closest="dl" jxdom-action="replace">

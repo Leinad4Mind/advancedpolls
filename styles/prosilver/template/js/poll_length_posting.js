@@ -28,9 +28,47 @@ function apDateTimeValue(date)
 function apMinimumPollEnd()
 {
 	var minimum = new Date();
+	var startInput = document.getElementById('wolfsblvt_poll_start');
+	var scheduledStart;
 	minimum.setSeconds(0, 0);
 	minimum.setMinutes(minimum.getMinutes() + 1);
+	if (startInput && startInput.value !== '')
+	{
+		scheduledStart = new Date(startInput.value);
+		if (!isNaN(scheduledStart.getTime()) && scheduledStart.getTime() >= minimum.getTime())
+		{
+			minimum.setTime(scheduledStart.getTime());
+			minimum.setMinutes(minimum.getMinutes() + 1);
+		}
+	}
 	return minimum;
+}
+
+function apSelectedPollStart()
+{
+	var input = document.getElementById('wolfsblvt_poll_start');
+	var selected = input && input.value !== '' ? new Date(input.value) : new Date();
+	if (isNaN(selected.getTime()))
+	{
+		selected = new Date();
+	}
+	selected.setSeconds(0, 0);
+	return selected;
+}
+
+function apPollScheduleChanged()
+{
+	var duration = document.getElementById('wolfsblvt_poll_duration').value;
+	apPollStartInitial = apSelectedPollStart();
+	apPollStart = new Date(apPollStartInitial.getTime());
+	if (duration == 'wolfsblvt_poll_length')
+	{
+		apAdjustLength(document.getElementById('poll_length').value);
+	}
+	else if (duration == 'wolfsblvt_poll_end')
+	{
+		apAdjustEndDateTime(document.getElementById('wolfsblvt_poll_end_datetime').value);
+	}
 }
 
 function apRefreshPollEndMinimum()
@@ -64,6 +102,11 @@ function apInitPollLength()
 
 	apPollStart.setTime(apPollEnd.getTime() - apPollLength * 1000);
 	apPollStartInitial = new Date(apPollStart.getTime());
+	if (document.getElementById('wolfsblvt_poll_start'))
+	{
+		apPollStartInitial = apSelectedPollStart();
+		apPollStart = new Date(apPollStartInitial.getTime());
+	}
 
 	var duration = (length > 0) ? 1 : 0;
 	document.getElementById('wolfsblvt_poll_duration').selectedIndex = duration;

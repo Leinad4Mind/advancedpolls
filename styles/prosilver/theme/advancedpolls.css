@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * Advanced Polls
- * 
- * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
+ *
+ * @copyright (c) 2015 Wolfsblvt
  * @copyright (c) 2026 Leinad4Mind
  * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
  * @author Clemens Husung (Wolfsblvt)
@@ -13,6 +13,88 @@ fieldset.polls dl.poll_voters_box {
 	padding-top: 0px;
 	margin-left: 35px;
 	border-top: 0px solid transparent;
+}
+
+.ap-poll-manage-bar .inner,
+.ap-poll-manage-bar .panel-body,
+.ap-poll-item-actions,
+.ap-poll-manage-controls {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.ap-poll-filter-buttons {
+	float: none;
+}
+
+.ap-poll-manage-controls {
+	margin: 0;
+	margin-inline-start: auto;
+}
+
+.ap-poll-item-actions {
+	margin-top: 10px;
+}
+
+.ap-poll-inline-manage {
+	display: inline-flex;
+	margin: 0;
+	margin-inline-start: auto;
+}
+
+.ap-poll-select {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.ap-poll-list-item > .inner,
+.ap-poll-list-item > .panel-body {
+	position: relative;
+}
+
+.ap-poll-select-corner {
+	inset-block-start: 0;
+	inset-inline-end: 12px;
+	margin: 0;
+	position: absolute;
+	z-index: 1;
+}
+
+.ap-poll-list-item h3 {
+	padding-inline-end: 32px;
+}
+
+.ap-poll-list-pagination {
+	margin: 0;
+}
+
+.ap-poll-list-item {
+	border-inline-start: 6px solid transparent;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.ap-poll-list-item.ap-poll-state-open {
+	border-inline-start-color: #6f8975;
+}
+
+.ap-poll-list-item.ap-poll-state-closed {
+	border-inline-start-color: #96716f;
+}
+
+.ap-poll-list-item,
+.ap-poll-list-item > .inner,
+.ap-poll-list-item > .panel-body {
+	background-color: #ECF3F7;
+}
+
+.ap-poll-list-item.ap-poll-row-odd,
+.ap-poll-list-item.ap-poll-row-odd > .inner,
+.ap-poll-list-item.ap-poll-row-odd > .panel-body {
+	background-color: #E1EBF2;
 }
 span.poll_vote_notice {
 	display: block;

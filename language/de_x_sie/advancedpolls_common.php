@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * Advanced Polls [English]
+ * Advanced Polls [Deutsch]
  *
  * @copyright (c) 2015 Wolfsblvt ( www.pinkes-forum.de )
  * @copyright (c) 2026 Leinad4Mind
