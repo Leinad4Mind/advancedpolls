@@ -2,6 +2,14 @@
 
 All notable changes to Advanced Polls are documented here.
 
+## 1.7.2 - 2026-08-19
+
+- Fixed the poll directory and status manager counting stale topic metadata as real polls.
+- Required real poll options before a poll can be listed, opened or closed.
+- Added an ACP integrity report with raw titles, timing fields, poll options and vote counts.
+- Added selective and board-wide cleanup for residual poll metadata, protected by confirmation, CSRF validation and an administrator log entry.
+- Kept ambiguous rows with poll options or vote history read-only for manual review.
+
 ## 1.7.1 - 2026-08-18
 
 - Fixed the scheduled poll start column using phpBB's portable full timestamp type.

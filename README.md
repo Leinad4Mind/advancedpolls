@@ -41,6 +41,7 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 - Numeric scoring bars can display averages and optionally hide percentage labels.
 - Results may be sorted by their result value.
 - A board-wide poll directory lists accessible open and closed polls, with an optional navigation-bar link.
+- Administrators can inspect and safely clean residual poll metadata through an ACP integrity report.
 - Polls can be prepared with a future start date and time. Their topics remain visible while the poll itself stays hidden and inactive until the scheduled start.
 - Polls can end after a duration in days or hours, or at an exact date and time.
 - Users can collapse individual polls when the feature is enabled in the ACP. It defaults to enabled on a new installation when `phpbb/collapsiblecategories` is installed, but administrators can always override it.
@@ -56,6 +57,14 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 - Votes belonging to deleted accounts follow the selected phpBB deletion operation: retaining posts preserves the vote under the retained username, while deleting posts removes the vote.
 
 ## Changes by release
+
+### 1.7.2
+
+- Fixed stale topic metadata being counted and managed as real polls.
+- Required real poll options before a poll can be listed, opened, or closed.
+- Added an ACP report showing raw poll fields, options, vote counts, and integrity status.
+- Added confirmed, CSRF-protected cleanup for residual rows with no options or vote history.
+- Kept ambiguous rows read-only for manual review and logged every cleanup action.
 
 ### 1.7.1
 
@@ -134,7 +143,19 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
-Always use this disable/replace/enable sequence. Version 1.7.1 corrects the `wolfsblvt_poll_scheduled_start` column type and repairs columns already created by version 1.7.0. phpBB must run the migration before a scheduled poll is created.
+Always use this disable/replace/enable sequence. Version 1.7.2 installs the poll-data cleanup module and includes the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
+
+## Poll data cleanup
+
+Open **ACP > Extensions > Advanced Polls > Poll data cleanup** to inspect every topic carrying poll metadata, options, or vote rows. The report separates valid polls, safe residual titles, and ambiguous rows requiring manual review.
+
+Only rows with a residual title and no poll options or vote history can be selected. You may clean selected rows or all safe residual rows. Both actions:
+
+- require ACP board-administrator permission, a valid form token, and explicit confirmation;
+- recheck the database condition immediately before the update;
+- create an administrator log entry.
+
+Create a complete database backup before cleanup. Rows with options or vote history are deliberately read-only so their evidence can be investigated manually.
 
 ## Languages
 
