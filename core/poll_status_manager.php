@@ -69,10 +69,10 @@ class poll_status_manager
 		$this->db->sql_transaction('begin');
 		try
 		{
-			$sql = 'SELECT topic_id, forum_id, poll_start, poll_length, wolfsblvt_poll_saved_remaining,
+			$sql = 'SELECT t.topic_id, t.forum_id, t.poll_start, t.poll_length, t.wolfsblvt_poll_saved_remaining,
 					wolfsblvt_poll_scheduled_start
-				FROM ' . $this->table_prefix . 'topics
-				WHERE poll_title <> \'\'
+				FROM ' . $this->table_prefix . 'topics t
+				WHERE ' . poll_integrity::valid_condition('t', $this->table_prefix . 'poll_options') . '
 					AND ' . $this->db->sql_in_set('topic_id', $topic_ids);
 			$result = $this->db->sql_query($sql);
 			while ($row = $this->db->sql_fetchrow($result))

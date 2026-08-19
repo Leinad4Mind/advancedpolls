@@ -11,6 +11,7 @@
 namespace wolfsblvt\advancedpolls\controller;
 
 use wolfsblvt\advancedpolls\core\poll_options;
+use wolfsblvt\advancedpolls\core\poll_integrity;
 use wolfsblvt\advancedpolls\core\poll_status_manager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -64,7 +65,7 @@ class poll_list
 		$readable_forums = array_keys($this->auth->acl_getf('f_read', true));
 		$now = time();
 		$where = array(
-			"t.poll_title <> ''",
+			poll_integrity::valid_condition('t', POLL_OPTIONS_TABLE),
 			'(t.wolfsblvt_poll_scheduled_start = 0 OR t.wolfsblvt_poll_scheduled_start <= ' . $now . ')',
 			't.topic_visibility = ' . ITEM_APPROVED,
 			't.topic_moved_id = 0',
