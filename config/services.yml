@@ -41,6 +41,11 @@ services:
             - '@dbal.conn'
             - '@auth'
             - '%core.table_prefix%'
+    wolfsblvt.advancedpolls.poll_cleanup_manager:
+        class: wolfsblvt\advancedpolls\core\poll_cleanup_manager
+        arguments:
+            - '@dbal.conn'
+            - '%core.table_prefix%'
     wolfsblvt.advancedpolls.advancedpolls:
         class: wolfsblvt\advancedpolls\core\advancedpolls
         arguments:

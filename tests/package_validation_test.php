@@ -42,6 +42,7 @@ class package_validation_test extends TestCase
 		$this->assertArrayHasKey('wolfsblvt.advancedpolls.multi_question_manager', $parsed_services['services']);
 		$this->assertArrayHasKey('wolfsblvt.advancedpolls.poll_option_appender', $parsed_services['services']);
 		$this->assertArrayHasKey('wolfsblvt.advancedpolls.poll_status_manager', $parsed_services['services']);
+		$this->assertArrayHasKey('wolfsblvt.advancedpolls.poll_cleanup_manager', $parsed_services['services']);
 		$this->assertArrayHasKey('wolfsblvt.advancedpolls.notification.type.optionsadded', $parsed_services['services']);
 		$this->assertArrayHasKey('wolfsblvt_advancedpolls_infopoll', $parsed_routing);
 		$this->assertArrayHasKey('wolfsblvt_advancedpolls_multi_question_vote', $parsed_routing);
