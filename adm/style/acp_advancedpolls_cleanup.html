@@ -16,6 +16,7 @@
 	<dl><dt>{L_AP_CLEANUP_VALID_TOTAL}{L_COLON}</dt><dd><strong>{VALID_TOTAL}</strong></dd></dl>
 	<dl><dt>{L_AP_CLEANUP_RESIDUAL_TOTAL}{L_COLON}</dt><dd><strong>{CLEANABLE_TOTAL}</strong></dd></dl>
 	<dl><dt>{L_AP_CLEANUP_INCONSISTENT_TOTAL}{L_COLON}</dt><dd><strong>{INCONSISTENT_TOTAL}</strong></dd></dl>
+	<dl><dt>{L_AP_CLEANUP_EMPTY_WRAPPER_TOTAL}{L_COLON}</dt><dd><strong>{EMPTY_WRAPPER_TOTAL}</strong></dd></dl>
 </fieldset>
 
 <div class="pagination">
@@ -84,6 +85,12 @@
 		<label><input type="checkbox" id="ap-cleanup-select-page" /> {L_AP_CLEANUP_SELECT_PAGE}</label>
 		<button class="button1" type="submit" name="cleanup_action" value="selected">{L_AP_CLEANUP_SELECTED}</button>
 		<!-- IF S_HAS_CLEANABLE --><button class="button2" type="submit" name="cleanup_action" value="all">{L_AP_CLEANUP_ALL}</button><!-- ENDIF -->
+	</fieldset>
+	<!-- ENDIF -->
+	<!-- IF S_HAS_EMPTY_WRAPPERS -->
+	<fieldset class="quick">
+		<p>{L_AP_CLEANUP_NORMALIZE_EMPTY_EXPLAIN}</p>
+		<button class="button2" type="submit" name="cleanup_action" value="normalize_empty">{L_AP_CLEANUP_NORMALIZE_EMPTY}</button>
 	</fieldset>
 	<!-- ENDIF -->
 	{S_FORM_TOKEN}

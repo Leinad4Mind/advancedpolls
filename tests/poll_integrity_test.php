@@ -20,6 +20,7 @@ class poll_integrity_test extends TestCase
 		$condition = poll_integrity::valid_condition('t', 'phpbb_poll_options');
 
 		$this->assertStringContainsString("t.poll_title <> ''", $condition);
+		$this->assertStringContainsString("t.poll_title <> '<t></t>'", $condition);
 		$this->assertStringContainsString('t.poll_start > 0', $condition);
 		$this->assertStringContainsString('FROM phpbb_poll_options ap_poll_option', $condition);
 		$this->assertStringContainsString('ap_poll_option.topic_id = t.topic_id', $condition);
@@ -39,7 +40,17 @@ class poll_integrity_test extends TestCase
 		$inconsistent = poll_integrity::inconsistent_condition('t', 'phpbb_poll_options');
 		$reported = poll_integrity::reported_condition('t', 'phpbb_poll_options');
 
-		$this->assertStringContainsString("t.poll_title = '' OR t.poll_start = 0", $inconsistent);
+		$this->assertStringContainsString("t.poll_title = ''", $inconsistent);
+		$this->assertStringContainsString("t.poll_title = '<t></t>'", $inconsistent);
 		$this->assertStringContainsString("t.poll_title <> '' OR EXISTS", $reported);
+	}
+
+	public function test_phpbb_empty_title_wrapper_is_not_meaningful()
+	{
+		$this->assertFalse(poll_integrity::title_is_meaningful(''));
+		$this->assertFalse(poll_integrity::title_is_meaningful('<t></t>'));
+		$this->assertFalse(poll_integrity::title_is_meaningful('  <t></t>  '));
+		$this->assertTrue(poll_integrity::title_is_meaningful('<t>Question</t>'));
+		$this->assertSame("topic.poll_title = '<t></t>'", poll_integrity::empty_wrapper_condition('topic'));
 	}
 }

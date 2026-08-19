@@ -55,6 +55,7 @@ class poll_cleanup_manager
 			'cleanable' => $this->count_condition($this->condition_for_filter(self::FILTER_CLEANABLE)),
 			'inconsistent' => $this->count_condition($this->condition_for_filter(self::FILTER_INCONSISTENT)),
 			'reported' => $this->count_condition($this->condition_for_filter(self::FILTER_ALL)),
+			'empty_wrappers' => $this->count_condition(poll_integrity::empty_wrapper_condition('t')),
 		);
 	}
 
@@ -110,6 +111,28 @@ class poll_cleanup_manager
 	}
 
 	/**
+	 * Clean safe residual rows and report candidates skipped after revalidation.
+	 *
+	 * @param array $topic_ids Selected topic IDs
+	 * @param bool $all_cleanable Clean every currently cleanable topic
+	 * @return array
+	 */
+	public function cleanup_with_report(array $topic_ids, $all_cleanable = false)
+	{
+		$topic_ids = array_values(array_unique(array_filter(array_map('intval', $topic_ids))));
+		$requested = $all_cleanable
+			? $this->count_condition($this->condition_for_filter(self::FILTER_CLEANABLE))
+			: count($topic_ids);
+		$cleaned = $this->cleanup($topic_ids, $all_cleanable);
+
+		return array(
+			'requested' => $requested,
+			'cleaned' => $cleaned,
+			'skipped' => max(0, $requested - $cleaned),
+		);
+	}
+
+	/**
 	 * Clear only topic metadata which still has a title but no poll options.
 	 *
 	 * @param array $topic_ids Selected topic IDs
@@ -149,6 +172,35 @@ class poll_cleanup_manager
 			$sql = 'UPDATE ' . $topics_table . '
 				SET ' . $this->db->sql_build_array('UPDATE', $fields) . '
 				WHERE ' . $where;
+			$this->db->sql_query($sql);
+			$affected = (int) $this->db->sql_affectedrows();
+			$this->db->sql_transaction('commit');
+		}
+		catch (\Throwable $exception)
+		{
+			$this->db->sql_transaction('rollback');
+			throw $exception;
+		}
+
+		return $affected;
+	}
+
+	/**
+	 * Normalize phpBB's empty rich-text title wrapper without touching poll data.
+	 *
+	 * @return int Number of normalized topic rows
+	 */
+	public function normalize_empty_titles()
+	{
+		$topics_table = $this->table_prefix . 'topics';
+		$fields = array('poll_title' => '');
+
+		$this->db->sql_transaction('begin');
+		try
+		{
+			$sql = 'UPDATE ' . $topics_table . '
+				SET ' . $this->db->sql_build_array('UPDATE', $fields) . '
+				WHERE ' . poll_integrity::empty_wrapper_condition($topics_table);
 			$this->db->sql_query($sql);
 			$affected = (int) $this->db->sql_affectedrows();
 			$this->db->sql_transaction('commit');
@@ -229,11 +281,13 @@ class poll_cleanup_manager
 
 	protected function classify(array $row)
 	{
-		if ((string) $row['poll_title'] !== '' && (int) $row['option_count'] === 0 && (int) $row['vote_count'] === 0)
+		$stored_title = (string) $row['poll_title'];
+		$meaningful_title = poll_integrity::title_is_meaningful($stored_title);
+		if ($stored_title !== '' && (int) $row['option_count'] === 0 && (int) $row['vote_count'] === 0)
 		{
 			return self::FILTER_CLEANABLE;
 		}
-		if (((int) $row['option_count'] > 0 && ((string) $row['poll_title'] === '' || (int) $row['poll_start'] === 0))
+		if (((int) $row['option_count'] > 0 && (!$meaningful_title || (int) $row['poll_start'] === 0))
 			|| ((int) $row['option_count'] === 0 && (int) $row['vote_count'] > 0))
 		{
 			return self::FILTER_INCONSISTENT;

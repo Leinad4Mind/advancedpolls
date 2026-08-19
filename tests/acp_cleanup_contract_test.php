@@ -31,8 +31,10 @@ class acp_cleanup_contract_test extends TestCase
 		$this->assertStringContainsString('check_form_key($this->form_key)', $module);
 		$this->assertStringContainsString('confirm_box(true)', $module);
 		$this->assertStringContainsString("'LOG_AP_POLL_CLEANUP'", $module);
-		$this->assertStringContainsString("in_array(\$action, array('selected', 'all'), true)", $module);
-		$this->assertStringContainsString('$cleanup->cleanup($topic_ids, $all_cleanable)', $module);
+		$this->assertStringContainsString("in_array(\$action, array('selected', 'all', 'normalize_empty'), true)", $module);
+		$this->assertStringContainsString('$cleanup->cleanup_with_report($topic_ids, $all_cleanable)', $module);
+		$this->assertStringContainsString('$cleanup->normalize_empty_titles()', $module);
+		$this->assertStringContainsString("'AP_CLEANUP_RESULT_DETAIL'", $module);
 	}
 
 	public function test_cleanup_template_shows_raw_poll_evidence_and_safe_actions()
@@ -46,6 +48,9 @@ class acp_cleanup_contract_test extends TestCase
 		$this->assertStringContainsString('name="topic_ids[]"', $template);
 		$this->assertStringContainsString('value="selected"', $template);
 		$this->assertStringContainsString('value="all"', $template);
+		$this->assertStringContainsString('value="normalize_empty"', $template);
+		$this->assertStringContainsString('{EMPTY_WRAPPER_TOTAL}', $template);
+		$this->assertStringContainsString('{L_AP_CLEANUP_NORMALIZE_EMPTY_EXPLAIN}', $template);
 		$this->assertStringContainsString('{S_FORM_TOKEN}', $template);
 	}
 }

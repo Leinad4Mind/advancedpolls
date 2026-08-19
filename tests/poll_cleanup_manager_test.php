@@ -19,12 +19,12 @@ class poll_cleanup_manager_test extends TestCase
 	{
 		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
 		$queries = array();
-		$db->expects($this->exactly(5))->method('sql_query')->willReturnCallback(function ($sql) use (&$queries) {
+		$db->expects($this->exactly(6))->method('sql_query')->willReturnCallback(function ($sql) use (&$queries) {
 			$queries[] = $sql;
 			return 'count-' . count($queries);
 		});
-		$db->method('sql_fetchfield')->willReturnOnConsecutiveCalls(2824, 103, 2720, 1, 2824);
-		$db->expects($this->exactly(5))->method('sql_freeresult');
+		$db->method('sql_fetchfield')->willReturnOnConsecutiveCalls(2824, 103, 2720, 1, 2824, 2718);
+		$db->expects($this->exactly(6))->method('sql_freeresult');
 
 		$manager = new poll_cleanup_manager($db, 'phpbb_');
 		$this->assertSame(array(
@@ -33,6 +33,7 @@ class poll_cleanup_manager_test extends TestCase
 			'cleanable' => 2720,
 			'inconsistent' => 1,
 			'reported' => 2824,
+			'empty_wrappers' => 2718,
 		), $manager->get_summary());
 		$this->assertStringContainsString("t.poll_title <> ''", $queries[0]);
 		$this->assertStringContainsString('t.poll_start > 0', $queries[1]);
@@ -40,6 +41,7 @@ class poll_cleanup_manager_test extends TestCase
 		$this->assertStringContainsString('FROM phpbb_poll_votes', $queries[2]);
 		$this->assertStringContainsString('FROM phpbb_poll_votes', $queries[3]);
 		$this->assertStringContainsString('FROM phpbb_poll_votes', $queries[4]);
+		$this->assertStringContainsString("t.poll_title = '<t></t>'", $queries[5]);
 	}
 
 	public function test_diagnostic_rows_include_option_and_vote_details()
@@ -69,7 +71,7 @@ class poll_cleanup_manager_test extends TestCase
 				'topic_id' => 6,
 				'forum_id' => 2,
 				'topic_title' => 'Damaged poll',
-				'poll_title' => 'Question without options',
+				'poll_title' => '<t></t>',
 				'poll_start' => 100,
 				'poll_length' => 0,
 				'poll_max_options' => 1,
@@ -140,6 +142,54 @@ class poll_cleanup_manager_test extends TestCase
 		$this->assertStringContainsString('FROM phpbb_poll_options', $update);
 		$this->assertStringContainsString('FROM phpbb_poll_votes', $update);
 		$this->assertStringContainsString('phpbb_topics.topic_id IN (5, 6)', $update);
+	}
+
+	public function test_cleanup_report_exposes_rows_skipped_during_revalidation()
+	{
+		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
+		$manager = $this->getMockBuilder(poll_cleanup_manager::class)
+			->setConstructorArgs(array($db, 'phpbb_'))
+			->onlyMethods(array('cleanup'))
+			->getMock();
+		$manager->expects($this->once())->method('cleanup')
+			->with(array(5, 6), false)
+			->willReturn(1);
+
+		$this->assertSame(array(
+			'requested' => 2,
+			'cleaned' => 1,
+			'skipped' => 1,
+		), $manager->cleanup_with_report(array(5, 6, 5)));
+	}
+
+	public function test_empty_title_normalization_preserves_every_other_poll_field()
+	{
+		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
+		$transactions = array();
+		$fields = array();
+		$update = '';
+		$db->method('sql_transaction')->willReturnCallback(function ($action) use (&$transactions) {
+			$transactions[] = $action;
+			return true;
+		});
+		$db->expects($this->once())->method('sql_build_array')->willReturnCallback(function ($mode, $values) use (&$fields) {
+			$fields = $values;
+			return "poll_title = ''";
+		});
+		$db->expects($this->once())->method('sql_query')->willReturnCallback(function ($sql) use (&$update) {
+			$update = $sql;
+			return true;
+		});
+		$db->method('sql_affectedrows')->willReturn(14);
+
+		$manager = new poll_cleanup_manager($db, 'phpbb_');
+		$this->assertSame(14, $manager->normalize_empty_titles());
+		$this->assertSame(array('begin', 'commit'), $transactions);
+		$this->assertSame(array('poll_title' => ''), $fields);
+		$this->assertStringContainsString("phpbb_topics.poll_title = '<t></t>'", $update);
+		$this->assertStringNotContainsString('poll_options', $update);
+		$this->assertStringNotContainsString('poll_votes', $update);
+		$this->assertStringNotContainsString('poll_start', $update);
 	}
 
 	public function test_unknown_filter_defaults_to_cleanable_rows()

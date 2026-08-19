@@ -15,6 +15,8 @@ namespace wolfsblvt\advancedpolls\core;
  */
 class poll_integrity
 {
+	const EMPTY_STORED_TITLE = '<t></t>';
+
 	/**
 	 * A usable phpBB poll has a title, a start time and at least one option.
 	 *
@@ -24,8 +26,8 @@ class poll_integrity
 	 */
 	public static function valid_condition($topic_alias, $options_table)
 	{
-		return $topic_alias . ".poll_title <> ''
-			AND " . $topic_alias . '.poll_start > 0
+		return self::meaningful_title_condition($topic_alias) . '
+			AND ' . $topic_alias . '.poll_start > 0
 			AND ' . self::has_options_condition($topic_alias, $options_table);
 	}
 
@@ -52,7 +54,7 @@ class poll_integrity
 	public static function inconsistent_condition($topic_alias, $options_table)
 	{
 		return self::has_options_condition($topic_alias, $options_table) . '
-			AND (' . $topic_alias . ".poll_title = '' OR " . $topic_alias . '.poll_start = 0)';
+			AND (' . self::empty_title_condition($topic_alias) . ' OR ' . $topic_alias . '.poll_start = 0)';
 	}
 
 	/**
@@ -65,6 +67,53 @@ class poll_integrity
 	public static function reported_condition($topic_alias, $options_table)
 	{
 		return $topic_alias . ".poll_title <> '' OR " . self::has_options_condition($topic_alias, $options_table);
+	}
+
+	/**
+	 * A meaningful title excludes phpBB's rich-text wrapper for an empty value.
+	 *
+	 * @param string $topic_alias Topic table alias
+	 * @return string SQL condition
+	 */
+	public static function meaningful_title_condition($topic_alias)
+	{
+		return $topic_alias . ".poll_title <> ''
+			AND " . $topic_alias . ".poll_title <> '" . self::EMPTY_STORED_TITLE . "'";
+	}
+
+	/**
+	 * Match raw database values which represent an empty poll title.
+	 *
+	 * @param string $topic_alias Topic table alias
+	 * @return string SQL condition
+	 */
+	public static function empty_title_condition($topic_alias)
+	{
+		return '(' . $topic_alias . ".poll_title = '' OR " . self::empty_wrapper_condition($topic_alias) . ')';
+	}
+
+	/**
+	 * Match phpBB's stored rich-text wrapper for an empty value.
+	 *
+	 * @param string $topic_alias Topic table alias
+	 * @return string SQL condition
+	 */
+	public static function empty_wrapper_condition($topic_alias)
+	{
+		return $topic_alias . ".poll_title = '" . self::EMPTY_STORED_TITLE . "'";
+	}
+
+	/**
+	 * Determine whether a raw stored poll title contains actual text.
+	 *
+	 * @param string $title Stored poll title
+	 * @return bool
+	 */
+	public static function title_is_meaningful($title)
+	{
+		$title = trim((string) $title);
+
+		return $title !== '' && $title !== self::EMPTY_STORED_TITLE;
 	}
 
 	protected static function has_options_condition($topic_alias, $options_table)
