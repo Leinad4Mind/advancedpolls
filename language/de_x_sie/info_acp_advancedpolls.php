@@ -38,6 +38,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Advanced Polls',
 	'AP_SETTINGS_ACP' => 'Einstellungen',
+	'AP_CLEANUP_ACP' => 'Bereinigung der Umfragedaten',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> %1$d Themenzeilen mit veralteten Umfragedaten bereinigt',
 
 	'AP_TITLE'         => 'Advanced Polls',
 	'AP_TITLE_EXPLAIN' => 'Erweitert das Umfragen-System von phpBB mit neuen Funktionen, wie das Verbergen der Abstimmungen bis zum Ende der Umfrage, dem Anzeigen der Benutzer, die abgestimmt haben, dem Beschränken des Abstimmens und mehr.',

@@ -38,6 +38,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Avancerede afstemninger',
 	'AP_SETTINGS_ACP' => 'Indstillinger',
+	'AP_CLEANUP_ACP' => 'Oprydning af afstemningsdata',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> Ryddede %1$d emnerækker med resterende afstemningsdata',
 
 	'AP_TITLE'         => 'Avancerede afstemninger',
 	'AP_TITLE_EXPLAIN' => 'Udvider phpBB´s standard afstemningssystem med nye funktioner som mulighed for at skjule afgivne stemmer til afstemningens ophør, visning af hvem der har stemt hvad, begrænsning af stemmemuligheder m.m.',

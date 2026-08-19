@@ -1,0 +1,107 @@
+<!-- INCLUDE overall_header.html -->
+
+<a id="maincontent"></a>
+
+<h1>{L_AP_CLEANUP_TITLE}</h1>
+<p>{L_AP_CLEANUP_EXPLAIN}</p>
+
+<div class="errorbox notice">
+	<h3>{L_WARNING}</h3>
+	<p>{L_AP_CLEANUP_BACKUP_WARNING}</p>
+</div>
+
+<fieldset>
+	<legend>{L_AP_CLEANUP_SUMMARY}</legend>
+	<dl><dt>{L_AP_CLEANUP_MARKED_TOTAL}{L_COLON}</dt><dd><strong>{MARKED_TOTAL}</strong></dd></dl>
+	<dl><dt>{L_AP_CLEANUP_VALID_TOTAL}{L_COLON}</dt><dd><strong>{VALID_TOTAL}</strong></dd></dl>
+	<dl><dt>{L_AP_CLEANUP_RESIDUAL_TOTAL}{L_COLON}</dt><dd><strong>{CLEANABLE_TOTAL}</strong></dd></dl>
+	<dl><dt>{L_AP_CLEANUP_INCONSISTENT_TOTAL}{L_COLON}</dt><dd><strong>{INCONSISTENT_TOTAL}</strong></dd></dl>
+</fieldset>
+
+<div class="pagination">
+	{TOTAL_ROWS} {L_AP_CLEANUP_ROWS}
+	<!-- IF pagination --> &bull; <!-- INCLUDE pagination.html --><!-- ENDIF -->
+</div>
+
+<p class="quick">
+	<a class="button2<!-- IF CURRENT_FILTER == 'cleanable' --> disabled<!-- ENDIF -->" href="{U_FILTER_CLEANABLE}">{L_AP_CLEANUP_FILTER_CLEANABLE}</a>
+	<a class="button2<!-- IF CURRENT_FILTER == 'inconsistent' --> disabled<!-- ENDIF -->" href="{U_FILTER_INCONSISTENT}">{L_AP_CLEANUP_FILTER_INCONSISTENT}</a>
+	<a class="button2<!-- IF CURRENT_FILTER == 'valid' --> disabled<!-- ENDIF -->" href="{U_FILTER_VALID}">{L_AP_CLEANUP_FILTER_VALID}</a>
+	<a class="button2<!-- IF CURRENT_FILTER == 'all' --> disabled<!-- ENDIF -->" href="{U_FILTER_ALL}">{L_AP_CLEANUP_FILTER_ALL}</a>
+</p>
+
+<form id="acp_advancedpolls_cleanup" method="post" action="{U_ACTION}">
+	<input type="hidden" name="filter" value="{CURRENT_FILTER}" />
+
+	<table class="table1 zebra-table fixed-width-table">
+		<thead>
+			<tr>
+				<th style="width: 4%; text-align: center;">{L_AP_CLEANUP_SELECT}</th>
+				<th style="width: 20%;">{L_AP_CLEANUP_TOPIC}</th>
+				<th style="width: 20%;">{L_AP_CLEANUP_POLL_TITLE}</th>
+				<th style="width: 19%;">{L_AP_CLEANUP_TIMING}</th>
+				<th style="width: 20%;">{L_AP_CLEANUP_OPTIONS}</th>
+				<th style="width: 7%; text-align: center;">{L_AP_CLEANUP_VOTES}</th>
+				<th style="width: 10%;">{L_AP_CLEANUP_STATUS}</th>
+			</tr>
+		</thead>
+		<tbody>
+		<!-- BEGIN poll_row -->
+			<tr>
+				<td style="text-align: center;">
+					<!-- IF poll_row.S_CLEANABLE --><input type="checkbox" name="topic_ids[]" value="{poll_row.TOPIC_ID}" class="ap-cleanup-checkbox" /><!-- ELSE -->&mdash;<!-- ENDIF -->
+				</td>
+				<td>
+					<a href="{poll_row.U_TOPIC}"><strong>#{poll_row.TOPIC_ID} {poll_row.TOPIC_TITLE}</strong></a><br />
+					<small>{poll_row.FORUM_NAME}</small>
+				</td>
+				<td><code><!-- IF poll_row.POLL_TITLE -->{poll_row.POLL_TITLE}<!-- ELSE -->{L_AP_CLEANUP_EMPTY}<!-- ENDIF --></code></td>
+				<td>
+					<strong>{L_AP_CLEANUP_START}{L_COLON}</strong> {poll_row.POLL_START} ({poll_row.POLL_START_DATE})<br />
+					<strong>{L_AP_CLEANUP_LENGTH}{L_COLON}</strong> {poll_row.POLL_LENGTH}<br />
+					<strong>{L_AP_CLEANUP_END}{L_COLON}</strong> {poll_row.POLL_END_DATE}<br />
+					<small>{L_AP_CLEANUP_SAVED_REMAINING}{L_COLON} {poll_row.SAVED_REMAINING}; {L_AP_CLEANUP_SCHEDULED_START}{L_COLON} {poll_row.SCHEDULED_START}</small>
+				</td>
+				<td>
+					<strong>{poll_row.OPTION_COUNT}</strong>
+					<!-- IF .poll_row.option --><ul><!-- BEGIN option --><li><code>#{poll_row.option.ID} {poll_row.option.TEXT}</code> ({poll_row.option.TOTAL})</li><!-- END option --></ul><!-- ENDIF -->
+				</td>
+				<td style="text-align: center;">{poll_row.VOTE_COUNT}</td>
+				<td>
+					<!-- IF poll_row.S_CLEANABLE --><strong style="color: #b33;">{L_AP_CLEANUP_STATUS_CLEANABLE}</strong>
+					<!-- ELSE IF poll_row.S_INCONSISTENT --><strong style="color: #b07800;">{L_AP_CLEANUP_STATUS_INCONSISTENT}</strong>
+					<!-- ELSE --><strong style="color: #27843a;">{L_AP_CLEANUP_STATUS_VALID}</strong><!-- ENDIF -->
+				</td>
+			</tr>
+		<!-- BEGINELSE -->
+			<tr><td colspan="7" style="text-align: center;">{L_AP_CLEANUP_NO_ROWS}</td></tr>
+		<!-- END poll_row -->
+		</tbody>
+	</table>
+
+	<!-- IF .poll_row -->
+	<fieldset class="quick">
+		<label><input type="checkbox" id="ap-cleanup-select-page" /> {L_AP_CLEANUP_SELECT_PAGE}</label>
+		<button class="button1" type="submit" name="cleanup_action" value="selected">{L_AP_CLEANUP_SELECTED}</button>
+		<!-- IF S_HAS_CLEANABLE --><button class="button2" type="submit" name="cleanup_action" value="all">{L_AP_CLEANUP_ALL}</button><!-- ENDIF -->
+	</fieldset>
+	<!-- ENDIF -->
+	{S_FORM_TOKEN}
+</form>
+
+<div class="pagination">
+	<!-- IF pagination --><!-- INCLUDE pagination.html --><!-- ENDIF -->
+</div>
+
+<script>
+var apCleanupSelectPage = document.getElementById('ap-cleanup-select-page');
+if (apCleanupSelectPage) {
+	apCleanupSelectPage.addEventListener('change', function () {
+		document.querySelectorAll('.ap-cleanup-checkbox').forEach(function (checkbox) {
+			checkbox.checked = this.checked;
+		}, this);
+	});
+}
+</script>
+
+<!-- INCLUDE overall_footer.html -->

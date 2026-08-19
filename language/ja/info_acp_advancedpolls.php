@@ -38,6 +38,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Advanced Polls',
 	'AP_SETTINGS_ACP' => '設定',
+	'AP_CLEANUP_ACP' => '投票データのクリーンアップ',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> 残存する投票データを含むトピック行 %1$d 件をクリーンアップしました',
 
 	'AP_TITLE'         => 'Advanced Polls',
 	'AP_TITLE_EXPLAIN' => 'phpBBのコア投票システムを、投票終了まで結果を非表示にする、投票したユーザーを表示する、投票可能ユーザーを制限するなどの新機能を使用して進化向上します。',

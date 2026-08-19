@@ -39,6 +39,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Geavanceerde Peilingen',
 	'AP_SETTINGS_ACP' => 'Instellingen',
+	'AP_CLEANUP_ACP' => 'Opschonen van pollgegevens',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> %1$d topicrijen met achtergebleven pollgegevens opgeschoond',
 
 	'AP_TITLE'         => 'Geavanceerde Peilingen',
 	'AP_TITLE_EXPLAIN' => 'Uitbreiding van de in phpBB aanwezige Peiling systeem met oa.stemmen verbergen tot einde peiling, stemmers tonen, beperken van de stemmers en meer.',

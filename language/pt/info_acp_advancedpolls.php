@@ -38,6 +38,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Votações Avançadas',
 	'AP_SETTINGS_ACP' => 'Configuração',
+	'AP_CLEANUP_ACP' => 'Limpeza de dados de votações',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> Foram limpas %1$d linhas de tópicos com dados residuais de votações',
 
 	'AP_TITLE'         => 'Votações Avançadas',
 	'AP_TITLE_EXPLAIN' => 'Melhora o sistema de votações nativo do phpBB com novas funcionalidades como ocultar votos até ao final, mostrar os votantes da votação, limitar os votantes e mais.',

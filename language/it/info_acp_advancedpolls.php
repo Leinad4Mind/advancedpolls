@@ -39,6 +39,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Sondaggi avanzati',
 	'AP_SETTINGS_ACP' => 'Impostazioni',
+	'AP_CLEANUP_ACP' => 'Pulizia dei dati dei sondaggi',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> Ripulite %1$d righe di argomenti con dati residui dei sondaggi',
 
 	'AP_TITLE'         => 'Sondaggi avanzati',
 	'AP_TITLE_EXPLAIN' => 'Estende la funzione base dei sondaggi phpBB con nuove impostazioni come nascondere i voti fino al termine di un sondaggio, mostrare i votanti, limitare il voto e molto altro.',

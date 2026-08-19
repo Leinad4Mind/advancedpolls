@@ -38,6 +38,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Zaawansowane głosowanie',
 	'AP_SETTINGS_ACP' => 'Ustawienia',
+	'AP_CLEANUP_ACP' => 'Czyszczenie danych ankiet',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> Wyczyszczono %1$d wierszy tematów z pozostałościami danych ankiet',
 
 	'AP_TITLE'         => 'Zaawansowane głosowanie',
 	'AP_TITLE_EXPLAIN' => 'Zaawansowane głosowanie to podstawowy system ankiet phpBB z nowymi funkcjami, takimi jak ukrywanie głosów do końca, pokazywanie wyborców, ograniczanie głosów i nie tylko.',

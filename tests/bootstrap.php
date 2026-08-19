@@ -111,5 +111,6 @@ require_once __DIR__ . '/../migrations/v1_6_1_schema.php';
 require_once __DIR__ . '/../migrations/v1_7_0_schema.php';
 require_once __DIR__ . '/../migrations/v1_7_0_data.php';
 require_once __DIR__ . '/../migrations/v1_7_1_schema.php';
+require_once __DIR__ . '/../migrations/v1_7_2_data.php';
 require_once __DIR__ . '/../acp/advancedpolls_module.php';
 require_once __DIR__ . '/../ext.php';

@@ -39,6 +39,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Avancerade omröstningar',
 	'AP_SETTINGS_ACP' => 'Inställningar',
+	'AP_CLEANUP_ACP' => 'Rensning av omröstningsdata',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> Rensade %1$d ämnesrader med kvarvarande omröstningsdata',
 
 	'AP_TITLE'         => 'Avancerade omröstningar',
 	'AP_TITLE_EXPLAIN' => 'Utökar omröstningssystemet i phpBB med nya funktioner, du kan t.ex. dölja omröstningesresultatet tills omröstningen har avslutats, visa vem som röstat, osv.',

@@ -19,6 +19,7 @@ class advancedpolls_info
 			'title'    => 'AP_TITLE_ACP',
 			'modes'    => [
 				'settings' => ['title' => 'AP_SETTINGS_ACP', 'auth' => 'ext_wolfsblvt/advancedpolls && acl_a_board', 'cat' => ['AP_TITLE_ACP']],
+				'cleanup' => ['title' => 'AP_CLEANUP_ACP', 'auth' => 'ext_wolfsblvt/advancedpolls && acl_a_board', 'cat' => ['AP_TITLE_ACP']],
 			],
 		];
 	}

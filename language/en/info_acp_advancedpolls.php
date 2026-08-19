@@ -38,6 +38,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Advanced Polls',
 	'AP_SETTINGS_ACP' => 'Settings',
+	'AP_CLEANUP_ACP' => 'Poll data cleanup',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> Cleaned %1$d topic rows containing residual poll data',
 
 	'AP_TITLE'         => 'Advanced Polls',
 	'AP_TITLE_EXPLAIN' => 'Advances the core poll system of phpBB with new features like hiding votes till end, showing poll voters, limiting the votes and more.',

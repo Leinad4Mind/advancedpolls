@@ -27,6 +27,9 @@ class package_validation_test extends TestCase
 		$this->assertArrayNotHasKey('version-check', $composer['extra']);
 		$this->assertFileExists($this->extension_root() . '/README.md');
 		$this->assertFileExists($this->extension_root() . '/CHANGELOG.md');
+		$this->assertFileExists($this->extension_root() . '/adm/style/acp_advancedpolls_cleanup.html');
+		$this->assertFileExists($this->extension_root() . '/language/en/acp_cleanup.php');
+		$this->assertFileExists($this->extension_root() . '/migrations/v1_7_2_data.php');
 	}
 
 	public function test_services_register_listener_core_controller_cron_and_notification()

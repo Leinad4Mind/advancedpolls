@@ -39,6 +39,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Encuestas Avanzadas',
 	'AP_SETTINGS_ACP' => 'Configuración',
+	'AP_CLEANUP_ACP' => 'Limpieza de datos de encuestas',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> Se limpiaron %1$d filas de temas con datos residuales de encuestas',
 
 	'AP_TITLE'         => 'Encuestas Avanzadas',
 	'AP_TITLE_EXPLAIN' => 'Mejora el sistema de encuestas nativo de phpBB con nuevas posibilidades como ocultar votos hasta el final, mostrar los votantes de la encuesta, limitar los posibles votantes y más.',

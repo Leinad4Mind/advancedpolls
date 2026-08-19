@@ -26,6 +26,7 @@ use wolfsblvt\advancedpolls\migrations\v1_6_1_schema;
 use wolfsblvt\advancedpolls\migrations\v1_7_0_data;
 use wolfsblvt\advancedpolls\migrations\v1_7_0_schema;
 use wolfsblvt\advancedpolls\migrations\v1_7_1_schema;
+use wolfsblvt\advancedpolls\migrations\v1_7_2_data;
 
 class integration_contract_test extends TestCase
 {
@@ -364,6 +365,25 @@ class integration_contract_test extends TestCase
 		);
 		$this->assertSame(array('TIMESTAMP', 0), $columns['wolfsblvt_poll_scheduled_start']);
 		$this->assertSame(array(), $migration->revert_schema());
+	}
+
+	public function test_v1_7_2_adds_poll_cleanup_acp_mode()
+	{
+		$migration = $this->create_schema_migration(v1_7_2_data::class);
+		$this->assertSame(
+			array('\wolfsblvt\advancedpolls\migrations\v1_7_1_schema'),
+			v1_7_2_data::depends_on()
+		);
+		$this->assertSame(array(
+			array('module.add', array(
+				'acp',
+				'AP_TITLE_ACP',
+				array(
+					'module_basename' => '\wolfsblvt\advancedpolls\acp\advancedpolls_module',
+					'modes' => array('cleanup'),
+				),
+			)),
+		), $migration->update_data());
 	}
 
 	public function test_v1_4_data_enables_collapsible_polls_when_categories_extension_is_installed()

@@ -39,6 +39,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'סקרים מתקדמים',
 	'AP_SETTINGS_ACP' => 'הגדרות',
+	'AP_CLEANUP_ACP' => 'ניקוי נתוני סקרים',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls:</strong> נוקו %1$d רשומות נושא עם נתוני סקר שיוריים',
 
 	'AP_TITLE'         => 'סקרים מתקדמים',
 	'AP_TITLE_EXPLAIN' => 'מקדם את מערכת הסקרים של phpBB עם אפשרויות חדשות כגון הסתרת הצבעות עד סוף הסקר, הצגת שמות המצביעים ועוד.',

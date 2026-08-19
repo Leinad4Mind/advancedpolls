@@ -42,6 +42,8 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'AP_TITLE_ACP'    => 'Sondages avancés',
 	'AP_SETTINGS_ACP' => 'Paramètres',
+	'AP_CLEANUP_ACP' => 'Nettoyage des données de sondage',
+	'LOG_AP_POLL_CLEANUP' => '<strong>Advanced Polls :</strong> %1$d lignes de sujets contenant des données résiduelles de sondage ont été nettoyées',
 
 	'AP_TITLE'         => 'Sondages avancés',
 	'AP_TITLE_EXPLAIN' => 'Système avancé des sondages de phpBB comportant de nouvelles fonctionnalités telles que les votes masqués jusqu’à la fin, l’affichage du nom des votants, la restriction de votes et davantage.',

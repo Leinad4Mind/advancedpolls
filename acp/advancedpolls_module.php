@@ -12,6 +12,7 @@
 namespace wolfsblvt\advancedpolls\acp;
 
 use wolfsblvt\advancedpolls\core\poll_options;
+use wolfsblvt\advancedpolls\core\poll_cleanup_manager;
 
 class advancedpolls_module
 {
@@ -55,6 +56,19 @@ class advancedpolls_module
 		$this->user = $phpbb_container->get('user');
 		$this->template = $phpbb_container->get('template');
 		$this->request = $phpbb_container->get('request');
+
+		if ($mode === 'cleanup')
+		{
+			$this->user->add_lang_ext('wolfsblvt/advancedpolls', array('info_acp_advancedpolls', 'acp_cleanup'));
+			$this->render_cleanup(
+				$phpbb_container->get('wolfsblvt.advancedpolls.poll_cleanup_manager'),
+				$phpbb_container->get('pagination'),
+				$phpbb_container->get('log'),
+				$phpbb_container->getParameter('core.root_path'),
+				$phpbb_container->getParameter('core.php_ext')
+			);
+			return;
+		}
 
 		$action = $this->request->variable('action', '', true);
 		$submit = ($this->request->is_set_post('submit')) ? true : false;
@@ -109,6 +123,129 @@ class advancedpolls_module
 		// Output page template file
 		$this->tpl_name = 'acp_advancedpolls';
 		$this->page_title = $this->user->lang($display_vars['title']);
+	}
+
+	protected function render_cleanup(poll_cleanup_manager $cleanup, \phpbb\pagination $pagination, $log, $root_path, $php_ext)
+	{
+		$this->form_key = 'acp_advancedpolls_cleanup';
+		add_form_key($this->form_key);
+		$filter = poll_cleanup_manager::normalise_filter($this->request->variable('filter', poll_cleanup_manager::FILTER_CLEANABLE));
+		$start = max(0, $this->request->variable('start', 0));
+		$action = $this->request->variable('cleanup_action', '');
+
+		if (in_array($action, array('selected', 'all'), true))
+		{
+			if (!check_form_key($this->form_key))
+			{
+				trigger_error($this->user->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
+			$topic_ids = array_values(array_unique(array_filter(array_map('intval', $this->request->variable('topic_ids', array(0))))));
+			$all_cleanable = $action === 'all';
+			if (!$all_cleanable && !$topic_ids)
+			{
+				trigger_error($this->user->lang('AP_CLEANUP_NOTHING_SELECTED') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
+			$summary = $cleanup->get_summary();
+			$requested = $all_cleanable ? (int) $summary['cleanable'] : count($topic_ids);
+			if (confirm_box(true))
+			{
+				$affected = $cleanup->cleanup($topic_ids, $all_cleanable);
+				$log->add(
+					'admin',
+					(int) $this->user->data['user_id'],
+					$this->user->ip,
+					'LOG_AP_POLL_CLEANUP',
+					time(),
+					array($affected)
+				);
+				trigger_error($this->user->lang('AP_CLEANUP_RESULT', $affected) . adm_back_link($this->u_action), E_USER_NOTICE);
+			}
+
+			$hidden = array(
+				'cleanup_action' => $action,
+				'filter' => $filter,
+				'start' => $start,
+				'form_token' => $this->request->variable('form_token', ''),
+				'creation_time' => $this->request->variable('creation_time', 0),
+			);
+			if (!$all_cleanable)
+			{
+				$hidden['topic_ids'] = $topic_ids;
+			}
+			confirm_box(
+				false,
+				$this->user->lang($all_cleanable ? 'AP_CLEANUP_CONFIRM_ALL' : 'AP_CLEANUP_CONFIRM_SELECTED', $requested),
+				build_hidden_fields($hidden),
+				'confirm_body.html',
+				$this->u_action
+			);
+			return;
+		}
+
+		$summary = $cleanup->get_summary();
+		$per_page = 50;
+		$total = $cleanup->count_rows($filter);
+		$start = $pagination->validate_start($start, $per_page, $total);
+		$rows = $cleanup->get_rows($filter, $per_page, $start);
+
+		foreach ($rows as $row)
+		{
+			$poll_start = (int) $row['poll_start'];
+			$poll_length = (int) $row['poll_length'];
+			$poll_end = $poll_length > 0 ? $poll_start + $poll_length : 0;
+			$integrity = $row['integrity'];
+			$this->template->assign_block_vars('poll_row', array(
+				'TOPIC_ID' => (int) $row['topic_id'],
+				'TOPIC_TITLE' => htmlspecialchars((string) $row['topic_title'], ENT_COMPAT, 'UTF-8'),
+				'FORUM_NAME' => htmlspecialchars((string) $row['forum_name'], ENT_COMPAT, 'UTF-8'),
+				'POLL_TITLE' => htmlspecialchars((string) $row['poll_title'], ENT_COMPAT, 'UTF-8'),
+				'POLL_START' => $poll_start,
+				'POLL_START_DATE' => $poll_start > 0 ? $this->user->format_date($poll_start) : '-',
+				'POLL_LENGTH' => $poll_length,
+				'POLL_END_DATE' => $poll_end > 0 ? $this->user->format_date($poll_end) : '-',
+				'POLL_MAX_OPTIONS' => (int) $row['poll_max_options'],
+				'POLL_LAST_VOTE' => (int) $row['poll_last_vote'],
+				'SAVED_REMAINING' => (int) $row['wolfsblvt_poll_saved_remaining'],
+				'SCHEDULED_START' => (int) $row['wolfsblvt_poll_scheduled_start'],
+				'OPTION_COUNT' => (int) $row['option_count'],
+				'VOTE_COUNT' => (int) $row['vote_count'],
+				'S_CLEANABLE' => $integrity === poll_cleanup_manager::FILTER_CLEANABLE,
+				'S_INCONSISTENT' => $integrity === poll_cleanup_manager::FILTER_INCONSISTENT,
+				'S_VALID' => $integrity === poll_cleanup_manager::FILTER_VALID,
+				'U_TOPIC' => append_sid($root_path . 'viewtopic.' . $php_ext, 'f=' . (int) $row['forum_id'] . '&amp;t=' . (int) $row['topic_id']),
+			));
+
+			foreach ($row['options'] as $option)
+			{
+				$this->template->assign_block_vars('poll_row.option', array(
+					'ID' => (int) $option['poll_option_id'],
+					'TEXT' => htmlspecialchars((string) $option['poll_option_text'], ENT_COMPAT, 'UTF-8'),
+					'TOTAL' => (int) $option['poll_option_total'],
+				));
+			}
+		}
+
+		$base_url = $this->u_action . '&amp;filter=' . urlencode($filter);
+		$pagination->generate_template_pagination($base_url, 'pagination', 'start', $total, $per_page, $start);
+		$this->template->assign_vars(array(
+			'U_ACTION' => $this->u_action,
+			'U_FILTER_CLEANABLE' => $this->u_action . '&amp;filter=' . poll_cleanup_manager::FILTER_CLEANABLE,
+			'U_FILTER_INCONSISTENT' => $this->u_action . '&amp;filter=' . poll_cleanup_manager::FILTER_INCONSISTENT,
+			'U_FILTER_VALID' => $this->u_action . '&amp;filter=' . poll_cleanup_manager::FILTER_VALID,
+			'U_FILTER_ALL' => $this->u_action . '&amp;filter=' . poll_cleanup_manager::FILTER_ALL,
+			'CURRENT_FILTER' => $filter,
+			'TOTAL_ROWS' => $total,
+			'MARKED_TOTAL' => (int) $summary['marked'],
+			'VALID_TOTAL' => (int) $summary['valid'],
+			'CLEANABLE_TOTAL' => (int) $summary['cleanable'],
+			'INCONSISTENT_TOTAL' => (int) $summary['inconsistent'],
+			'S_HAS_CLEANABLE' => (int) $summary['cleanable'] > 0,
+		));
+
+		$this->tpl_name = 'acp_advancedpolls_cleanup';
+		$this->page_title = $this->user->lang('AP_CLEANUP_ACP');
 	}
 
 	/**
