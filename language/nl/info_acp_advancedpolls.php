@@ -96,6 +96,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Toont de inklapoptie bij het maken of bewerken van een peiling. Bij installatie wordt deze instelling automatisch ingeschakeld als ‘Collapsible Forum Categories’ is geïnstalleerd; beheerders kunnen haar altijd wijzigen.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Peilingenlink in de navigatiebalk tonen',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Voegt een link naar de lijst met toegankelijke peilingen toe aan de navigatiebalk van het forum.',
+	'AP_POLL_LIST_ORDER'                 => 'Volgorde van polltabbladen',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Bepaalt de volgorde van de tabbladen Alle, Open en Gesloten. Het eerste tabblad wordt de standaardweergave wanneer de polllijst via de navigatiebalk wordt geopend.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Selecteer standaard waarde voor het wijzigen van stemmen',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Selecteer standaard waarde voor het verbergen van stemmen',

@@ -96,6 +96,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Visar hopfällningsalternativet när en omröstning skapas eller redigeras. Vid installation aktiveras inställningen automatiskt om ”Collapsible Forum Categories” är installerat; administratörer kan alltid ändra den.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Visa omröstningslänk i navigeringsfältet',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Lägger till en länk till listan över tillgängliga omröstningar i forumets navigeringsfält.',
+	'AP_POLL_LIST_ORDER'                 => 'Ordning för omröstningsflikar',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Styr ordningen för flikarna Alla, Öppna och Stängda. Den första fliken blir standardvy när omröstningslistan öppnas från navigeringsfältet.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Välj grundinställning för ändring av röstning',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Välj grundinställning för "Dölja omröstning"',

@@ -95,6 +95,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Mostra a opção de recolher ao criar ou editar uma enquete. Na instalação, esta configuração é ativada automaticamente se a extensão “Collapsible Forum Categories” estiver instalada; os administradores sempre podem alterá-la.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Exibir link de enquetes na barra de navegação',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Adiciona um link para a lista de enquetes acessíveis na barra de navegação do fórum.',
+	'AP_POLL_LIST_ORDER'                 => 'Ordem das abas do diretório de enquetes',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Define a ordem das abas Todas, Abertas e Fechadas. A primeira aba torna-se a visualização padrão ao abrir o diretório de enquetes pela barra de navegação.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Valor padrão para alterar voto',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Valor padrão para ocultar votos',

@@ -95,6 +95,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Shows the collapsible option when creating or editing a poll. On installation, this setting is enabled automatically if Collapsible Forum Categories is installed; administrators can always override it.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Show polls link in the navigation bar',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Adds a link to the accessible polls list in the forum navigation bar.',
+	'AP_POLL_LIST_ORDER'                 => 'Poll directory tab order',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Controls the order of the All, Open and Closed tabs. The first tab becomes the default view when the poll directory is opened from the navigation bar.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Selected default for change vote',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Selected default for hide votes',

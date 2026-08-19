@@ -96,6 +96,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Mostra l’opzione comprimibile durante la creazione o la modifica di un sondaggio. All’installazione questa impostazione viene attivata automaticamente se è installata «Collapsible Forum Categories»; gli amministratori possono sempre modificarla.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Mostra il collegamento ai sondaggi nella barra di navigazione',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Aggiunge alla barra di navigazione del forum un collegamento all’elenco dei sondaggi accessibili.',
+	'AP_POLL_LIST_ORDER'                 => 'Ordine delle schede dei sondaggi',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Controlla l’ordine delle schede Tutti, Aperti e Chiusi. La prima scheda diventa la vista predefinita quando la directory viene aperta dalla barra di navigazione.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Impostazione predefinita per cambio voto',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Impostazione predefinita per voti nascosti',

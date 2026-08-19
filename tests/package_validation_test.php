@@ -30,6 +30,7 @@ class package_validation_test extends TestCase
 		$this->assertFileExists($this->extension_root() . '/adm/style/acp_advancedpolls_cleanup.html');
 		$this->assertFileExists($this->extension_root() . '/language/en/acp_cleanup.php');
 		$this->assertFileExists($this->extension_root() . '/migrations/v1_7_2_data.php');
+		$this->assertFileExists($this->extension_root() . '/migrations/v1_7_2_poll_list_order.php');
 	}
 
 	public function test_services_register_listener_core_controller_cron_and_notification()
@@ -228,7 +229,7 @@ class package_validation_test extends TestCase
 		$poll_list_template = file_get_contents($root . 'template/advancedpolls_poll_list.html');
 		$poll_list_theme = file_get_contents($root . 'theme/advancedpolls.css');
 		$poll_manage_js = file_get_contents($root . 'template/js/poll_manage.js');
-		$this->assertStringContainsString('<h2 class="solo"><a href="{U_AP_POLL_LIST_ALL}">{L_AP_POLL_LIST}</a></h2>', $poll_list_template);
+		$this->assertStringContainsString('<h2 class="solo"><a href="{U_AP_POLL_LIST}">{L_AP_POLL_LIST}</a></h2>', $poll_list_template);
 		$this->assertStringContainsString('S_AP_CAN_MANAGE', $poll_list_template);
 		$this->assertStringContainsString('poll.S_CAN_MANAGE', $poll_list_template);
 		$this->assertStringContainsString('name="poll_ids[]"', $poll_list_template);
@@ -236,6 +237,7 @@ class package_validation_test extends TestCase
 		$this->assertStringContainsString('{S_FORM_TOKEN}', $poll_list_template);
 		$this->assertSame(2, substr_count($poll_list_template, 'data-ap-select-all'));
 		$this->assertSame(2, substr_count($poll_list_template, 'ap-poll-filter-buttons'));
+		$this->assertSame(2, substr_count($poll_list_template, '<!-- BEGIN poll_filter -->'));
 		$this->assertSame(1, substr_count($poll_list_template, 'ap-poll-manage-bar-bottom'));
 		$this->assertSame(1, substr_count($poll_list_template, 'id="ap-poll-manage-form"'));
 		$this->assertSame(2, substr_count($poll_list_template, 'form="ap-poll-manage-form" data-ap-bulk-action'));

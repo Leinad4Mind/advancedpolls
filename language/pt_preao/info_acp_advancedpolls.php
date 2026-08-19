@@ -95,6 +95,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Mostra a opção de recolher ao criar ou editar uma sondagem. Na instalação, esta definição é activada automaticamente se a extensão «Collapsible Forum Categories» estiver instalada; os administradores podem sempre alterá-la.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Mostrar ligação para votações na barra de navegação',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Adiciona uma ligação para a lista de votações acessíveis na barra de navegação do fórum.',
+	'AP_POLL_LIST_ORDER'                 => 'Ordem dos separadores do diretório de votações',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Define a ordem dos separadores Todas, Abertas e Fechadas. O primeiro separador torna-se a vista predefinida ao abrir o diretório de votações pela barra de navegação.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Valor por defeito para alterar voto',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Valor por defeito para ocultar votos',

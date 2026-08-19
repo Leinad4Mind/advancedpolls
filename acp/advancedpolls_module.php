@@ -13,6 +13,7 @@ namespace wolfsblvt\advancedpolls\acp;
 
 use wolfsblvt\advancedpolls\core\poll_options;
 use wolfsblvt\advancedpolls\core\poll_cleanup_manager;
+use wolfsblvt\advancedpolls\core\poll_list_order;
 
 class advancedpolls_module
 {
@@ -70,6 +71,7 @@ class advancedpolls_module
 			return;
 		}
 
+		$this->user->add_lang_ext('wolfsblvt/advancedpolls', 'advancedpolls');
 		$action = $this->request->variable('action', '', true);
 		$submit = ($this->request->is_set_post('submit')) ? true : false;
 
@@ -89,6 +91,7 @@ class advancedpolls_module
 				'wolfsblvt.advancedpolls.activate_poll_end'          => ['lang' => 'AP_ACT_POLL_END',			'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
 				'wolfsblvt.advancedpolls.activate_notifications'     => ['lang' => 'AP_ACT_POLL_NOTIFICATIONS',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
 				'wolfsblvt.advancedpolls.show_poll_list_navbar'      => ['lang' => 'AP_SHOW_POLL_LIST_NAVBAR',	'validate' => 'bool',		'type' => 'radio:enabled_disabled',	'explain' => true],
+				'wolfsblvt.advancedpolls.poll_list_order'             => ['lang' => 'AP_POLL_LIST_ORDER',		'validate' => 'string',		'type' => 'select:1', 'method' => 'select_poll_list_order', 'explain' => true],
 				'legend2'                                            => 'AP_PER_POLL_SETTINGS',
 				'wolfsblvt.advancedpolls.default_poll_visibility'    => ['lang' => 'AP_DEFAULT_POLL_VISIBILITY',	'validate' => 'int:0:3',	'type' => 'select:1', 'method' => 'select_poll_visibility', 'explain' => true],
 				'wolfsblvt.advancedpolls.default_poll_vote_mode'     => ['lang' => 'AP_DEFAULT_POLL_VOTE_MODE',	'validate' => 'int:0:2',	'type' => 'select:1', 'method' => 'select_poll_vote_mode', 'explain' => true],
@@ -297,6 +300,40 @@ class advancedpolls_module
 	}
 
 	/**
+	 * Build the poll-directory tab-order selector.
+	 *
+	 * The first tab in each option is also the default directory filter.
+	 *
+	 * @param string $value Current order
+	 * @param string $key Configuration key
+	 * @return string
+	 */
+	public function select_poll_list_order($value, $key)
+	{
+		$language_keys = array(
+			poll_list_order::FILTER_ALL => 'AP_POLL_LIST_ALL',
+			poll_list_order::FILTER_OPEN => 'AP_POLL_LIST_OPEN',
+			poll_list_order::FILTER_CLOSED => 'AP_POLL_LIST_CLOSED',
+		);
+		$selected = poll_list_order::serialise($value);
+		$html = '';
+		foreach (poll_list_order::supported_orders() as $order)
+		{
+			$serialised = implode(',', $order);
+			$labels = array();
+			foreach ($order as $filter)
+			{
+				$labels[] = $this->user->lang[$language_keys[$filter]];
+			}
+			$html .= '<option value="' . htmlspecialchars($serialised, ENT_COMPAT, 'UTF-8') . '"'
+				. ($serialised === $selected ? ' selected="selected"' : '') . '>'
+				. htmlspecialchars(implode(' > ', $labels), ENT_COMPAT, 'UTF-8') . '</option>';
+		}
+
+		return $html;
+	}
+
+	/**
 	 * Build selector option markup from trusted language keys.
 	 *
 	 * @param array $options Value => language key
@@ -327,6 +364,11 @@ class advancedpolls_module
 		$this->new_config = $this->config;
 		$cfg_array = ($this->request->is_set('config')) ? $this->request->variable('config', ['' => '']) : $this->new_config;
 		$error = isset($error) ? $error : [];
+		$order_key = 'wolfsblvt.advancedpolls.poll_list_order';
+		if (isset($cfg_array[$order_key]))
+		{
+			$cfg_array[$order_key] = poll_list_order::serialise($cfg_array[$order_key]);
+		}
 
 		validate_config_vars($display_vars['vars'], $cfg_array, $error);
 
@@ -383,6 +425,11 @@ class advancedpolls_module
 		$this->new_config = $this->config;
 		$cfg_array = ($this->request->is_set('config')) ? $this->request->variable('config', ['' => '']) : $this->new_config;
 		$error = isset($error) ? $error : [];
+		$order_key = 'wolfsblvt.advancedpolls.poll_list_order';
+		if (isset($cfg_array[$order_key]))
+		{
+			$cfg_array[$order_key] = poll_list_order::serialise($cfg_array[$order_key]);
+		}
 
 		validate_config_vars($display_vars['vars'], $cfg_array, $error);
 

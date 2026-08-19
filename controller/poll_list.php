@@ -12,6 +12,7 @@ namespace wolfsblvt\advancedpolls\controller;
 
 use wolfsblvt\advancedpolls\core\poll_options;
 use wolfsblvt\advancedpolls\core\poll_integrity;
+use wolfsblvt\advancedpolls\core\poll_list_order;
 use wolfsblvt\advancedpolls\core\poll_status_manager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -55,10 +56,12 @@ class poll_list
 	public function handle()
 	{
 		$this->user->add_lang_ext('wolfsblvt/advancedpolls', 'advancedpolls');
-		$filter = $this->request->variable('status', 'all');
-		if (!in_array($filter, array('all', 'open', 'closed'), true))
+		$order = $this->configured_order();
+		$default_filter = $order[0];
+		$filter = $this->request->variable('status', $default_filter);
+		if (!in_array($filter, $order, true))
 		{
-			$filter = 'all';
+			$filter = $default_filter;
 		}
 		$limit = max(1, (int) $this->config['topics_per_page']);
 		$start = max(0, $this->request->variable('start', 0));
@@ -150,7 +153,21 @@ class poll_list
 			));
 		}
 
-		$base_url = $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list', $filter === 'all' ? array() : array('status' => $filter));
+		$filter_language = array(
+			poll_list_order::FILTER_ALL => 'AP_POLL_LIST_ALL',
+			poll_list_order::FILTER_OPEN => 'AP_POLL_LIST_OPEN',
+			poll_list_order::FILTER_CLOSED => 'AP_POLL_LIST_CLOSED',
+		);
+		foreach ($order as $filter_name)
+		{
+			$this->template->assign_block_vars('poll_filter', array(
+				'URL' => $this->poll_list_url($filter_name, $default_filter),
+				'LABEL' => $this->user->lang[$filter_language[$filter_name]],
+				'S_ACTIVE' => $filter_name === $filter,
+			));
+		}
+
+		$base_url = $this->poll_list_url($filter, $default_filter);
 		$this->pagination->generate_template_pagination($base_url, 'pagination', 'start', $total, $limit, $start);
 		if ($can_manage_any)
 		{
@@ -163,9 +180,10 @@ class poll_list
 			'AP_POLL_START' => $start,
 			'S_AP_CAN_MANAGE' => $can_manage_any,
 			'U_AP_POLL_MANAGE' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_manage'),
-			'U_AP_POLL_LIST_ALL' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list'),
-			'U_AP_POLL_LIST_OPEN' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list', array('status' => 'open')),
-			'U_AP_POLL_LIST_CLOSED' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list', array('status' => 'closed')),
+			'U_AP_POLL_LIST' => $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list'),
+			'U_AP_POLL_LIST_ALL' => $this->poll_list_url(poll_list_order::FILTER_ALL, $default_filter),
+			'U_AP_POLL_LIST_OPEN' => $this->poll_list_url(poll_list_order::FILTER_OPEN, $default_filter),
+			'U_AP_POLL_LIST_CLOSED' => $this->poll_list_url(poll_list_order::FILTER_CLOSED, $default_filter),
 		));
 		return $this->controller_helper->render('@wolfsblvt_advancedpolls/advancedpolls_poll_list.html', $this->user->lang['AP_POLL_LIST']);
 	}
@@ -187,13 +205,15 @@ class poll_list
 		$topic_ids = $this->request->variable('poll_ids', array(0));
 		$this->poll_status_manager->change_status($topic_ids, $action, time());
 
-		$filter = $this->request->variable('status', 'all');
-		if (!in_array($filter, array('all', 'open', 'closed'), true))
+		$order = $this->configured_order();
+		$default_filter = $order[0];
+		$filter = $this->request->variable('status', $default_filter);
+		if (!in_array($filter, $order, true))
 		{
-			$filter = 'all';
+			$filter = $default_filter;
 		}
 		$params = array();
-		if ($filter !== 'all')
+		if ($filter !== $default_filter)
 		{
 			$params['status'] = $filter;
 		}
@@ -204,6 +224,24 @@ class poll_list
 		}
 
 		return new RedirectResponse($this->controller_helper->route('wolfsblvt_advancedpolls_poll_list', $params, false));
+	}
+
+	protected function poll_list_url($filter, $default_filter)
+	{
+		return $this->controller_helper->route('wolfsblvt_advancedpolls_poll_list', $filter === $default_filter ? array() : array('status' => $filter));
+	}
+
+	/**
+	 * Return a valid configured filter order, including during extension updates.
+	 *
+	 * @return array
+	 */
+	protected function configured_order()
+	{
+		$key = 'wolfsblvt.advancedpolls.poll_list_order';
+		$value = isset($this->config[$key]) ? $this->config[$key] : poll_list_order::DEFAULT_ORDER;
+
+		return poll_list_order::normalise($value);
 	}
 
 	/**

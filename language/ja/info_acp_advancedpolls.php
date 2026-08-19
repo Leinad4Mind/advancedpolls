@@ -95,6 +95,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => '投票の作成時または編集時に折りたたみオプションを表示します。インストール時に「Collapsible Forum Categories」がインストール済みの場合は自動的に有効になりますが、管理者はいつでも変更できます。',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'ナビゲーションバーに投票リンクを表示',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'フォーラムのナビゲーションバーに、閲覧可能な投票一覧へのリンクを追加します。',
+	'AP_POLL_LIST_ORDER'                 => '投票一覧タブの順序',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'すべて、受付中、終了の各タブの順序を設定します。ナビゲーションバーから投票一覧を開いたときは、先頭のタブが既定の表示になります。',
 
 	'AP_DEFAULT_VOTES_CHANGE' => '再投票許可の設定をデフォルトにする',
 	'AP_DEFAULT_VOTES_HIDE'   => '投票結果非表示の設定をデフォルトにする',

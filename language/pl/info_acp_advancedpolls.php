@@ -95,6 +95,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Wyświetla opcję zwijania podczas tworzenia lub edytowania ankiety. Przy instalacji ustawienie jest automatycznie włączane, jeśli zainstalowano „Collapsible Forum Categories”; administratorzy mogą je zawsze zmienić.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Pokaż odnośnik do ankiet na pasku nawigacji',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Dodaje na pasku nawigacji forum odnośnik do listy dostępnych ankiet.',
+	'AP_POLL_LIST_ORDER'                 => 'Kolejność kart ankiet',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Określa kolejność kart Wszystkie, Otwarte i Zamknięte. Pierwsza karta staje się widokiem domyślnym po otwarciu katalogu ankiet z paska nawigacji.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Wybierz domyślne ustawienia zmiany oddanego głosu',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Wybierz domyślne ustawienia ukrytych głosujących',

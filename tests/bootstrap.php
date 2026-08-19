@@ -79,6 +79,7 @@ if (!defined('ITEM_APPROVED'))
 
 require_once __DIR__ . '/../core/poll_options.php';
 require_once __DIR__ . '/../core/poll_integrity.php';
+require_once __DIR__ . '/../core/poll_list_order.php';
 require_once __DIR__ . '/../core/poll_cleanup_manager.php';
 require_once __DIR__ . '/../core/ranked_vote.php';
 require_once __DIR__ . '/../core/vote_validator.php';
@@ -112,5 +113,6 @@ require_once __DIR__ . '/../migrations/v1_7_0_schema.php';
 require_once __DIR__ . '/../migrations/v1_7_0_data.php';
 require_once __DIR__ . '/../migrations/v1_7_1_schema.php';
 require_once __DIR__ . '/../migrations/v1_7_2_data.php';
+require_once __DIR__ . '/../migrations/v1_7_2_poll_list_order.php';
 require_once __DIR__ . '/../acp/advancedpolls_module.php';
 require_once __DIR__ . '/../ext.php';

@@ -27,6 +27,7 @@ use wolfsblvt\advancedpolls\migrations\v1_7_0_data;
 use wolfsblvt\advancedpolls\migrations\v1_7_0_schema;
 use wolfsblvt\advancedpolls\migrations\v1_7_1_schema;
 use wolfsblvt\advancedpolls\migrations\v1_7_2_data;
+use wolfsblvt\advancedpolls\migrations\v1_7_2_poll_list_order;
 
 class integration_contract_test extends TestCase
 {
@@ -383,6 +384,18 @@ class integration_contract_test extends TestCase
 					'modes' => array('cleanup'),
 				),
 			)),
+		), $migration->update_data());
+	}
+
+	public function test_v1_7_2_adds_configurable_poll_list_order()
+	{
+		$migration = $this->create_schema_migration(v1_7_2_poll_list_order::class);
+		$this->assertSame(
+			array('\wolfsblvt\advancedpolls\migrations\v1_7_2_data'),
+			v1_7_2_poll_list_order::depends_on()
+		);
+		$this->assertSame(array(
+			array('config.add', array('wolfsblvt.advancedpolls.poll_list_order', 'all,open,closed')),
 		), $migration->update_data());
 	}
 

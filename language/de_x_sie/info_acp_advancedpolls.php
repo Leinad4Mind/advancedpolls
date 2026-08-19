@@ -95,6 +95,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Zeigt beim Erstellen oder Bearbeiten einer Umfrage die Option zum Einklappen an. Bei der Installation wird diese Einstellung automatisch aktiviert, wenn „Collapsible Forum Categories“ installiert ist; Administratoren können sie jederzeit ändern.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Umfragen-Link in der Navigationsleiste anzeigen',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Fügt der Navigationsleiste des Forums einen Link zur Liste der zugänglichen Umfragen hinzu.',
+	'AP_POLL_LIST_ORDER'                 => 'Reihenfolge der Umfrage-Tabs',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Legt die Reihenfolge der Tabs Alle, Offen und Geschlossen fest. Der erste Tab wird zur Standardansicht, wenn Sie das Umfrageverzeichnis über die Navigationsleiste öffnen.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Standard für "Ändern der Abstimmung erlauben"',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Standard für "Verbergen der Abstimmungsergebnisse"',

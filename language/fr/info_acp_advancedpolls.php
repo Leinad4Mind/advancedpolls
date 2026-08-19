@@ -99,6 +99,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN' => 'Affiche l’option réductible lors de la création ou de la modification d’un sondage. À l’installation, ce réglage est activé automatiquement si « Collapsible Forum Categories » est installé ; les administrateurs peuvent toujours le modifier.',
 	'AP_SHOW_POLL_LIST_NAVBAR' => 'Afficher le lien des sondages dans la barre de navigation',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN' => 'Ajoute dans la barre de navigation du forum un lien vers la liste des sondages accessibles.',
+	'AP_POLL_LIST_ORDER'                 => 'Ordre des onglets de sondages',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Définit l’ordre des onglets Tous, Ouverts et Fermés. Le premier onglet devient la vue par défaut lorsque le répertoire est ouvert depuis la barre de navigation.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Paramètre par défaut pour le changement des votes',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Paramètre par défaut pour les votes masqués',

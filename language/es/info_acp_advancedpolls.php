@@ -96,6 +96,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Muestra la opción contraíble al crear o editar una encuesta. Durante la instalación, esta opción se activa automáticamente si está instalada «Collapsible Forum Categories»; los administradores siempre pueden cambiarla.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Mostrar el enlace de encuestas en la barra de navegación',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Añade un enlace a la lista de encuestas accesibles en la barra de navegación del foro.',
+	'AP_POLL_LIST_ORDER'                 => 'Orden de las pestañas de encuestas',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Controla el orden de las pestañas Todas, Abiertas y Cerradas. La primera pestaña se convierte en la vista predeterminada al abrir el directorio desde la barra de navegación.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Valor por defecto para cambiar el voto',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Valor por defecto para votos ocultos',

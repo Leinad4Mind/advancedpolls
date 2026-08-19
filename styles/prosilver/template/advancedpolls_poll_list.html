@@ -1,14 +1,12 @@
 <!-- INCLUDE overall_header.html -->
-<h2 class="solo"><a href="{U_AP_POLL_LIST_ALL}">{L_AP_POLL_LIST}</a></h2>
+<h2 class="solo"><a href="{U_AP_POLL_LIST}">{L_AP_POLL_LIST}</a></h2>
 <div class="action-bar bar-top">
 	<!-- IF pagination --><div class="pagination">{AP_POLL_COUNT} <!-- INCLUDE pagination.html --></div><!-- ENDIF -->
 </div>
 <div class="panel ap-poll-manage-bar">
 	<div class="inner">
 		<div class="buttons ap-poll-filter-buttons">
-			<a class="button" href="{U_AP_POLL_LIST_ALL}">{L_AP_POLL_LIST_ALL}</a>
-			<a class="button" href="{U_AP_POLL_LIST_OPEN}">{L_AP_POLL_LIST_OPEN}</a>
-			<a class="button" href="{U_AP_POLL_LIST_CLOSED}">{L_AP_POLL_LIST_CLOSED}</a>
+			<!-- BEGIN poll_filter --><a class="button<!-- IF poll_filter.S_ACTIVE --> active<!-- ENDIF -->" href="{poll_filter.URL}">{poll_filter.LABEL}</a><!-- END poll_filter -->
 		</div>
 		<!-- IF S_AP_CAN_MANAGE -->
 		<form id="ap-poll-manage-form" class="ap-poll-manage-controls" action="{U_AP_POLL_MANAGE}" method="post">
@@ -55,9 +53,7 @@
 <div class="panel ap-poll-manage-bar ap-poll-manage-bar-bottom">
 	<div class="inner">
 		<div class="buttons ap-poll-filter-buttons">
-			<a class="button" href="{U_AP_POLL_LIST_ALL}">{L_AP_POLL_LIST_ALL}</a>
-			<a class="button" href="{U_AP_POLL_LIST_OPEN}">{L_AP_POLL_LIST_OPEN}</a>
-			<a class="button" href="{U_AP_POLL_LIST_CLOSED}">{L_AP_POLL_LIST_CLOSED}</a>
+			<!-- BEGIN poll_filter --><a class="button<!-- IF poll_filter.S_ACTIVE --> active<!-- ENDIF -->" href="{poll_filter.URL}">{poll_filter.LABEL}</a><!-- END poll_filter -->
 		</div>
 		<!-- IF S_AP_CAN_MANAGE -->
 		<div class="ap-poll-manage-controls">

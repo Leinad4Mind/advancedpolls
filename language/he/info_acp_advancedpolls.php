@@ -96,6 +96,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'מציג את אפשרות הקיפול בעת יצירה או עריכה של סקר. בעת ההתקנה ההגדרה מופעלת אוטומטית אם „Collapsible Forum Categories” מותקנת; מנהלים יכולים לשנות אותה בכל עת.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'הצגת קישור לסקרים בסרגל הניווט',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'מוסיף לסרגל הניווט של הפורום קישור לרשימת הסקרים הנגישים.',
+	'AP_POLL_LIST_ORDER'                 => 'סדר לשוניות הסקרים',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'קובע את סדר הלשוניות הכול, פתוחים וסגורים. הלשונית הראשונה תהיה תצוגת ברירת המחדל בעת פתיחת ספריית הסקרים מסרגל הניווט.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'ברירת המחדל עבור שינוי הצבעות',
 	'AP_DEFAULT_VOTES_HIDE'   => 'ברירת המחדר עבור הסתרת מצביעים',

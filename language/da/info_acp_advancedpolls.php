@@ -95,6 +95,8 @@ $lang = array_merge($lang, [
 	'AP_ACT_POLL_COLLAPSIBLE_EXPLAIN'   => 'Viser muligheden for sammenklapning, når en afstemning oprettes eller redigeres. Ved installation aktiveres denne indstilling automatisk, hvis Collapsible Forum Categories er installeret; administratorer kan altid tilsidesætte det.',
 	'AP_SHOW_POLL_LIST_NAVBAR'          => 'Vis link til afstemninger i navigationsbjælken',
 	'AP_SHOW_POLL_LIST_NAVBAR_EXPLAIN'  => 'Tilføjer et link til listen over tilgængelige afstemninger i forummets navigationsbjælke.',
+	'AP_POLL_LIST_ORDER'                 => 'Rækkefølge for afstemningsfaner',
+	'AP_POLL_LIST_ORDER_EXPLAIN'         => 'Bestemmer rækkefølgen af fanerne Alle, Åbne og Lukkede. Den første fane bliver standardvisningen, når afstemningsoversigten åbnes fra navigationslinjen.',
 
 	'AP_DEFAULT_VOTES_CHANGE' => 'Standard valg for ændre stemme',
 	'AP_DEFAULT_VOTES_HIDE'   => 'Standard valg for skjul stemmer',
