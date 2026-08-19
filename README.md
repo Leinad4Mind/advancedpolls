@@ -58,6 +58,12 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 
 ## Changes by release
 
+### 1.7.3
+
+- Treated phpBB's `<t></t>` rich-text wrapper as an empty poll title instead of a valid title.
+- Added a confirmed ACP action that normalizes empty stored titles without modifying options, votes, or timing data.
+- Reported how many requested residual rows were cleaned and how many were skipped after safety revalidation.
+
 ### 1.7.2
 
 - Fixed stale topic metadata being counted and managed as real polls.
@@ -146,7 +152,7 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
-Always use this disable/replace/enable sequence. Version 1.7.2 installs the poll-data cleanup module and includes the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
+Always use this disable/replace/enable sequence. Version 1.7.3 includes the poll-data cleanup module, empty stored-title normalization, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
 
 ## Poll data cleanup
 
@@ -160,6 +166,8 @@ Only rows with a residual title and no poll options or vote history can be selec
 
 Create a complete database backup before cleanup. Rows with options or vote history are deliberately read-only so their evidence can be investigated manually.
 
+
+phpBB can store an empty rich-text poll title as `<t></t>`. The report counts these wrappers separately and offers a confirmed normalization action which changes only `poll_title` to an empty database value. Existing options, votes, and timing fields are preserved for manual review.
 ## Languages
 
 The repository includes Danish, German, German (formal), English, Spanish, French, Hebrew, Italian, Japanese, Dutch, Polish, Portuguese, Brazilian Portuguese, Pre-AO Portuguese, Russian, and Swedish language packs.

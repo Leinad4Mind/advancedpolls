@@ -2,6 +2,12 @@
 
 All notable changes to Advanced Polls are documented here.
 
+## 1.7.3 - 2026-08-19
+
+- Treated phpBB's `<t></t>` rich-text wrapper as an empty poll title instead of a valid title.
+- Added a confirmed ACP action that normalizes empty stored titles without modifying poll options, votes or timing data.
+- Reported how many requested residual rows were cleaned and how many were skipped after safety revalidation.
+
 ## 1.7.2 - 2026-08-19
 
 - Fixed the poll directory and status manager counting stale topic metadata as real polls.
