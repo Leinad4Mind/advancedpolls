@@ -40,7 +40,7 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 - Detailed scoring and ranking breakdowns are available without reloading the topic.
 - Numeric scoring bars can display averages and optionally hide percentage labels.
 - Results may be sorted by their result value.
-- A board-wide poll directory lists accessible open and closed polls, with an optional navigation-bar link.
+- A board-wide poll directory lists accessible open and closed polls, with configurable tab order and an optional navigation-bar link.
 - Administrators can inspect and safely clean residual poll metadata through an ACP integrity report.
 - Polls can be prepared with a future start date and time. Their topics remain visible while the poll itself stays hidden and inactive until the scheduled start.
 - Polls can end after a duration in days or hours, or at an exact date and time.
@@ -65,6 +65,7 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 - Added an ACP report showing raw poll fields, options, vote counts, and integrity status.
 - Added confirmed, CSRF-protected cleanup for residual rows with no options or vote history.
 - Kept ambiguous rows read-only for manual review and logged every cleanup action.
+- Added an ACP setting for the poll-directory tab order; the first configured tab is the default, while new installations retain All, Open, Closed.
 
 ### 1.7.1
 
@@ -133,6 +134,8 @@ The release ZIP already contains the required `wolfsblvt/advancedpolls` director
 1. Open the Advanced Polls settings in the ACP and enable the board-wide features you want to offer. Review the defaults applied when users create polls.
 2. Review the **Can see poll voters** forum permission and the corresponding moderator permission. Grant access only to roles or groups that may see voter identities.
 3. If required, enable collapsible polls and the poll-directory navigation link in the extension settings.
+
+The poll-directory tabs are initially ordered **All, Open, Closed**. Their order can be changed in the extension settings; the first configured tab becomes the default view used by the navigation-bar link. Explicit tab links, pagination, and poll-management redirects preserve the selected filter.
 
 No additional setup is required for the remaining features.
 

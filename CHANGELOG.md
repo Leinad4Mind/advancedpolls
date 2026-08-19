@@ -8,6 +8,7 @@ All notable changes to Advanced Polls are documented here.
 - Required real poll options before a poll can be listed, opened or closed.
 - Added an ACP integrity report with raw titles, timing fields, poll options and vote counts.
 - Added selective and board-wide cleanup for residual poll metadata, protected by confirmation, CSRF validation and an administrator log entry.
+- Added an ACP setting for the poll-directory tab order; the first configured tab is the default, while new installations retain All, Open, Closed.
 - Kept ambiguous rows with poll options or vote history read-only for manual review.
 
 ## 1.7.1 - 2026-08-18
