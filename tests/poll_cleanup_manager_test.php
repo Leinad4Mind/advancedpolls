@@ -37,6 +37,9 @@ class poll_cleanup_manager_test extends TestCase
 		$this->assertStringContainsString("t.poll_title <> ''", $queries[0]);
 		$this->assertStringContainsString('t.poll_start > 0', $queries[1]);
 		$this->assertStringContainsString('NOT EXISTS', $queries[2]);
+		$this->assertStringContainsString('FROM phpbb_poll_votes', $queries[2]);
+		$this->assertStringContainsString('FROM phpbb_poll_votes', $queries[3]);
+		$this->assertStringContainsString('FROM phpbb_poll_votes', $queries[4]);
 	}
 
 	public function test_diagnostic_rows_include_option_and_vote_details()
@@ -62,14 +65,32 @@ class poll_cleanup_manager_test extends TestCase
 				'wolfsblvt_poll_scheduled_start' => 0,
 				'forum_name' => 'Forum',
 			)),
+			'topics_with_vote_history' => array(
+				'topic_id' => 6,
+				'forum_id' => 2,
+				'topic_title' => 'Damaged poll',
+				'poll_title' => 'Question without options',
+				'poll_start' => 100,
+				'poll_length' => 0,
+				'poll_max_options' => 1,
+				'poll_last_vote' => 0,
+				'poll_vote_change' => 0,
+				'wolfsblvt_poll_saved_remaining' => 0,
+				'wolfsblvt_poll_scheduled_start' => 0,
+				'forum_name' => 'Forum',
+			),
 			'options' => array(array(
 				'topic_id' => 5,
 				'poll_option_id' => 1,
 				'poll_option_text' => 'Yes',
 				'poll_option_total' => 3,
 			)),
-			'votes' => array(array('topic_id' => 5, 'total' => 3)),
+			'votes' => array(
+				array('topic_id' => 5, 'total' => 3),
+				array('topic_id' => 6, 'total' => 2),
+			),
 		);
+		$rows['topics'][] = $rows['topics_with_vote_history'];
 		$db->method('sql_fetchrow')->willReturnCallback(function ($result) use (&$rows) {
 			return empty($rows[$result]) ? false : array_shift($rows[$result]);
 		});
@@ -77,11 +98,13 @@ class poll_cleanup_manager_test extends TestCase
 		$manager = new poll_cleanup_manager($db, 'phpbb_');
 		$result = $manager->get_rows(poll_cleanup_manager::FILTER_ALL, 50, 0);
 
-		$this->assertCount(1, $result);
+		$this->assertCount(2, $result);
 		$this->assertSame('valid', $result[0]['integrity']);
 		$this->assertSame(1, $result[0]['option_count']);
 		$this->assertSame('Yes', $result[0]['options'][0]['poll_option_text']);
 		$this->assertSame(3, $result[0]['vote_count']);
+		$this->assertSame('inconsistent', $result[1]['integrity']);
+		$this->assertSame(2, $result[1]['vote_count']);
 	}
 
 	public function test_cleanup_resets_only_selected_title_rows_without_options()
@@ -115,6 +138,7 @@ class poll_cleanup_manager_test extends TestCase
 		$this->assertSame(0, $fields['poll_length']);
 		$this->assertStringContainsString('NOT EXISTS', $update);
 		$this->assertStringContainsString('FROM phpbb_poll_options', $update);
+		$this->assertStringContainsString('FROM phpbb_poll_votes', $update);
 		$this->assertStringContainsString('phpbb_topics.topic_id IN (5, 6)', $update);
 	}
 

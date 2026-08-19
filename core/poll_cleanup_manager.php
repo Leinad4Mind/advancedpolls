@@ -126,6 +126,7 @@ class poll_cleanup_manager
 
 		$topics_table = $this->table_prefix . 'topics';
 		$where = poll_integrity::cleanable_condition($topics_table, $this->table_prefix . 'poll_options');
+		$where .= ' AND NOT ' . $this->has_votes_condition($topics_table, $this->table_prefix . 'poll_votes');
 		if (!$all_cleanable)
 		{
 			$where .= ' AND ' . $this->db->sql_in_set($topics_table . '.topic_id', $topic_ids);
@@ -175,17 +176,22 @@ class poll_cleanup_manager
 	protected function condition_for_filter($filter)
 	{
 		$options_table = $this->table_prefix . 'poll_options';
+		$votes_table = $this->table_prefix . 'poll_votes';
 		switch ($filter)
 		{
 			case self::FILTER_VALID:
 				return poll_integrity::valid_condition('t', $options_table);
 			case self::FILTER_INCONSISTENT:
-				return poll_integrity::inconsistent_condition('t', $options_table);
+				return '(' . poll_integrity::inconsistent_condition('t', $options_table) . ')
+					OR (NOT ' . $this->has_options_condition('t', $options_table) . '
+						AND ' . $this->has_votes_condition('t', $votes_table) . ')';
 			case self::FILTER_ALL:
-				return poll_integrity::reported_condition('t', $options_table);
+				return '(' . poll_integrity::reported_condition('t', $options_table) . ')
+					OR ' . $this->has_votes_condition('t', $votes_table);
 			case self::FILTER_CLEANABLE:
 			default:
-				return poll_integrity::cleanable_condition('t', $options_table);
+				return poll_integrity::cleanable_condition('t', $options_table) . '
+					AND NOT ' . $this->has_votes_condition('t', $votes_table);
 		}
 	}
 
@@ -223,14 +229,27 @@ class poll_cleanup_manager
 
 	protected function classify(array $row)
 	{
-		if ((string) $row['poll_title'] !== '' && (int) $row['option_count'] === 0)
+		if ((string) $row['poll_title'] !== '' && (int) $row['option_count'] === 0 && (int) $row['vote_count'] === 0)
 		{
 			return self::FILTER_CLEANABLE;
 		}
-		if ((int) $row['option_count'] > 0 && ((string) $row['poll_title'] === '' || (int) $row['poll_start'] === 0))
+		if (((int) $row['option_count'] > 0 && ((string) $row['poll_title'] === '' || (int) $row['poll_start'] === 0))
+			|| ((int) $row['option_count'] === 0 && (int) $row['vote_count'] > 0))
 		{
 			return self::FILTER_INCONSISTENT;
 		}
 		return self::FILTER_VALID;
+	}
+
+	protected function has_options_condition($topic_alias, $options_table)
+	{
+		return 'EXISTS (SELECT 1 FROM ' . $options_table . ' ap_cleanup_option
+			WHERE ap_cleanup_option.topic_id = ' . $topic_alias . '.topic_id)';
+	}
+
+	protected function has_votes_condition($topic_alias, $votes_table)
+	{
+		return 'EXISTS (SELECT 1 FROM ' . $votes_table . ' ap_cleanup_vote
+			WHERE ap_cleanup_vote.topic_id = ' . $topic_alias . '.topic_id)';
 	}
 }
