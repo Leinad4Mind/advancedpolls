@@ -31,6 +31,7 @@ class acp_cleanup_contract_test extends TestCase
 		$this->assertStringContainsString('check_form_key($this->form_key)', $module);
 		$this->assertStringContainsString('confirm_box(true)', $module);
 		$this->assertStringContainsString("'LOG_AP_POLL_CLEANUP'", $module);
+		$this->assertStringContainsString('$this->request->is_set_post(\'cancel\')', $module);
 		$this->assertStringContainsString('in_array($action, array(\'selected\', \'all\'), true)', $module);
 		$this->assertStringContainsString('$cleanup->cleanup_with_report($topic_ids, $all_cleanable)', $module);
 		$this->assertStringContainsString("'AP_CLEANUP_RESULT_DETAIL'", $module);
@@ -42,7 +43,7 @@ class acp_cleanup_contract_test extends TestCase
 		$module = file_get_contents(dirname(__DIR__) . '/acp/advancedpolls_module.php');
 		$template_assignment = strpos($module, '$this->tpl_name = \'acp_advancedpolls_cleanup\';');
 		$page_title_assignment = strpos($module, '$this->page_title = $this->user->lang(\'AP_CLEANUP_ACP\');');
-		$action_branch = strpos($module, 'if (in_array($action');
+		$action_branch = strpos($module, 'in_array($action');
 
 		$this->assertNotFalse($template_assignment);
 		$this->assertNotFalse($page_title_assignment);

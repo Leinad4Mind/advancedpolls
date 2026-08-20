@@ -140,7 +140,7 @@ class advancedpolls_module
 		$start = max(0, $this->request->variable('start', 0));
 		$action = $this->request->variable('cleanup_action', '');
 
-		if (in_array($action, array('selected', 'all'), true))
+		if (!$this->request->is_set_post('cancel') && in_array($action, array('selected', 'all'), true))
 		{
 			if (!check_form_key($this->form_key))
 			{
