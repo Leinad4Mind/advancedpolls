@@ -87,6 +87,11 @@
 		<!-- IF S_HAS_CLEANABLE --><button class="button2" type="submit" name="cleanup_action" value="all">{L_AP_CLEANUP_ALL}</button><!-- ENDIF -->
 	</fieldset>
 	<!-- ENDIF -->
+	<!-- IF S_HAS_EMPTY_WRAPPERS -->
+	<fieldset class="quick">
+		<button class="button2" type="submit" name="cleanup_action" value="empty_wrappers">{L_AP_CLEANUP_EMPTY_WRAPPERS}</button>
+	</fieldset>
+	<!-- ENDIF -->
 	{S_FORM_TOKEN}
 </form>
 

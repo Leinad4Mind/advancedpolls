@@ -51,9 +51,12 @@ $lang = array_merge($lang, array(
 	'AP_CLEANUP_SELECT_PAGE' => 'Select cleanable rows on this page',
 	'AP_CLEANUP_SELECTED' => 'Clean selected',
 	'AP_CLEANUP_ALL' => 'Clean all residual titles',
+	'AP_CLEANUP_EMPTY_WRAPPERS' => 'Clean empty phpBB title wrappers',
 	'AP_CLEANUP_NOTHING_SELECTED' => 'No cleanable topic was selected.',
 	'AP_CLEANUP_CONFIRM_SELECTED' => 'Clean residual poll metadata from the %d selected topic rows?',
 	'AP_CLEANUP_CONFIRM_ALL' => 'Clean all %d residual poll title rows? Confirm that a complete database backup exists before continuing.',
+	'AP_CLEANUP_CONFIRM_EMPTY_WRAPPERS' => 'Clean %d empty phpBB poll title wrappers? Only poll_title will be changed; poll options, votes and timing fields will be preserved.',
 	'AP_CLEANUP_RESULT' => '%d residual topic rows were cleaned.',
 	'AP_CLEANUP_RESULT_DETAIL' => '%1$d residual topic rows were cleaned. %2$d rows were skipped because they now contain options or votes, or no longer have a residual title.',
+	'AP_CLEANUP_EMPTY_WRAPPERS_RESULT' => '%d empty phpBB poll title wrappers were cleaned. Poll options, votes and timing fields were preserved.',
 ));
