@@ -162,36 +162,6 @@ class poll_cleanup_manager_test extends TestCase
 		), $manager->cleanup_with_report(array(5, 6, 5)));
 	}
 
-	public function test_empty_title_normalization_preserves_every_other_poll_field()
-	{
-		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
-		$transactions = array();
-		$fields = array();
-		$update = '';
-		$db->method('sql_transaction')->willReturnCallback(function ($action) use (&$transactions) {
-			$transactions[] = $action;
-			return true;
-		});
-		$db->expects($this->once())->method('sql_build_array')->willReturnCallback(function ($mode, $values) use (&$fields) {
-			$fields = $values;
-			return "poll_title = ''";
-		});
-		$db->expects($this->once())->method('sql_query')->willReturnCallback(function ($sql) use (&$update) {
-			$update = $sql;
-			return true;
-		});
-		$db->method('sql_affectedrows')->willReturn(14);
-
-		$manager = new poll_cleanup_manager($db, 'phpbb_');
-		$this->assertSame(14, $manager->normalize_empty_titles());
-		$this->assertSame(array('begin', 'commit'), $transactions);
-		$this->assertSame(array('poll_title' => ''), $fields);
-		$this->assertStringContainsString("phpbb_topics.poll_title = '<t></t>'", $update);
-		$this->assertStringNotContainsString('poll_options', $update);
-		$this->assertStringNotContainsString('poll_votes', $update);
-		$this->assertStringNotContainsString('poll_start', $update);
-	}
-
 	public function test_unknown_filter_defaults_to_cleanable_rows()
 	{
 		$this->assertSame(poll_cleanup_manager::FILTER_CLEANABLE, poll_cleanup_manager::normalise_filter('invalid'));

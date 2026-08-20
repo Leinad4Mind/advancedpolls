@@ -140,7 +140,7 @@ class advancedpolls_module
 		$start = max(0, $this->request->variable('start', 0));
 		$action = $this->request->variable('cleanup_action', '');
 
-		if (in_array($action, array('selected', 'all', 'normalize_empty'), true))
+		if (in_array($action, array('selected', 'all'), true))
 		{
 			if (!check_form_key($this->form_key))
 			{
@@ -149,27 +149,18 @@ class advancedpolls_module
 
 			$topic_ids = array_values(array_unique(array_filter(array_map('intval', $this->request->variable('topic_ids', array(0))))));
 			$all_cleanable = $action === 'all';
-			$normalize_empty = $action === 'normalize_empty';
-			if (!$normalize_empty && !$all_cleanable && !$topic_ids)
+			if (!$all_cleanable && !$topic_ids)
 			{
 				trigger_error($this->user->lang('AP_CLEANUP_NOTHING_SELECTED') . adm_back_link($this->u_action), E_USER_WARNING);
 			}
 
 			$summary = $cleanup->get_summary();
-			$requested = $normalize_empty ? (int) $summary['empty_wrappers'] : ($all_cleanable ? (int) $summary['cleanable'] : count($topic_ids));
+			$requested = $all_cleanable ? (int) $summary['cleanable'] : count($topic_ids);
 			if (confirm_box(true))
 			{
-				if ($normalize_empty)
-				{
-					$affected = $cleanup->normalize_empty_titles();
-					$message = $this->user->lang('AP_CLEANUP_NORMALIZE_RESULT', $affected);
-				}
-				else
-				{
-					$result = $cleanup->cleanup_with_report($topic_ids, $all_cleanable);
-					$affected = $result['cleaned'];
-					$message = $this->user->lang('AP_CLEANUP_RESULT_DETAIL', $result['cleaned'], $result['skipped']);
-				}
+				$result = $cleanup->cleanup_with_report($topic_ids, $all_cleanable);
+				$affected = $result['cleaned'];
+				$message = $this->user->lang('AP_CLEANUP_RESULT_DETAIL', $result['cleaned'], $result['skipped']);
 				$log->add(
 					'admin',
 					(int) $this->user->data['user_id'],
@@ -188,11 +179,11 @@ class advancedpolls_module
 				'form_token' => $this->request->variable('form_token', ''),
 				'creation_time' => $this->request->variable('creation_time', 0),
 			);
-			if (!$normalize_empty && !$all_cleanable)
+			if (!$all_cleanable)
 			{
 				$hidden['topic_ids'] = $topic_ids;
 			}
-			$confirm_key = $normalize_empty ? 'AP_CLEANUP_CONFIRM_NORMALIZE_EMPTY' : ($all_cleanable ? 'AP_CLEANUP_CONFIRM_ALL' : 'AP_CLEANUP_CONFIRM_SELECTED');
+			$confirm_key = $all_cleanable ? 'AP_CLEANUP_CONFIRM_ALL' : 'AP_CLEANUP_CONFIRM_SELECTED';
 			confirm_box(
 				false,
 				$this->user->lang($confirm_key, $requested),
@@ -262,7 +253,6 @@ class advancedpolls_module
 			'INCONSISTENT_TOTAL' => (int) $summary['inconsistent'],
 			'EMPTY_WRAPPER_TOTAL' => (int) $summary['empty_wrappers'],
 			'S_HAS_CLEANABLE' => (int) $summary['cleanable'] > 0,
-			'S_HAS_EMPTY_WRAPPERS' => (int) $summary['empty_wrappers'] > 0,
 		));
 
 	}

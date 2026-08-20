@@ -185,35 +185,6 @@ class poll_cleanup_manager
 		return $affected;
 	}
 
-	/**
-	 * Normalize phpBB's empty rich-text title wrapper without touching poll data.
-	 *
-	 * @return int Number of normalized topic rows
-	 */
-	public function normalize_empty_titles()
-	{
-		$topics_table = $this->table_prefix . 'topics';
-		$fields = array('poll_title' => '');
-
-		$this->db->sql_transaction('begin');
-		try
-		{
-			$sql = 'UPDATE ' . $topics_table . '
-				SET ' . $this->db->sql_build_array('UPDATE', $fields) . '
-				WHERE ' . poll_integrity::empty_wrapper_condition($topics_table);
-			$this->db->sql_query($sql);
-			$affected = (int) $this->db->sql_affectedrows();
-			$this->db->sql_transaction('commit');
-		}
-		catch (\Throwable $exception)
-		{
-			$this->db->sql_transaction('rollback');
-			throw $exception;
-		}
-
-		return $affected;
-	}
-
 	protected function count_condition($condition)
 	{
 		$sql = 'SELECT COUNT(t.topic_id) AS total
