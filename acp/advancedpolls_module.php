@@ -130,6 +130,10 @@ class advancedpolls_module
 
 	protected function render_cleanup(poll_cleanup_manager $cleanup, \phpbb\pagination $pagination, $log, $root_path, $php_ext)
 	{
+		// These must be available before any action can raise an ACP notice.
+		$this->tpl_name = 'acp_advancedpolls_cleanup';
+		$this->page_title = $this->user->lang('AP_CLEANUP_ACP');
+
 		$this->form_key = 'acp_advancedpolls_cleanup';
 		add_form_key($this->form_key);
 		$filter = poll_cleanup_manager::normalise_filter($this->request->variable('filter', poll_cleanup_manager::FILTER_CLEANABLE));
@@ -261,8 +265,6 @@ class advancedpolls_module
 			'S_HAS_EMPTY_WRAPPERS' => (int) $summary['empty_wrappers'] > 0,
 		));
 
-		$this->tpl_name = 'acp_advancedpolls_cleanup';
-		$this->page_title = $this->user->lang('AP_CLEANUP_ACP');
 	}
 
 	/**

@@ -37,6 +37,20 @@ class acp_cleanup_contract_test extends TestCase
 		$this->assertStringContainsString("'AP_CLEANUP_RESULT_DETAIL'", $module);
 	}
 
+	public function test_cleanup_template_is_initialised_before_actions_can_raise_a_notice()
+	{
+		$module = file_get_contents(dirname(__DIR__) . '/acp/advancedpolls_module.php');
+		$template_assignment = strpos($module, '$this->tpl_name = \'acp_advancedpolls_cleanup\';');
+		$page_title_assignment = strpos($module, '$this->page_title = $this->user->lang(\'AP_CLEANUP_ACP\');');
+		$action_branch = strpos($module, 'if (in_array($action');
+
+		$this->assertNotFalse($template_assignment);
+		$this->assertNotFalse($page_title_assignment);
+		$this->assertNotFalse($action_branch);
+		$this->assertLessThan($action_branch, $template_assignment);
+		$this->assertLessThan($action_branch, $page_title_assignment);
+	}
+
 	public function test_cleanup_template_shows_raw_poll_evidence_and_safe_actions()
 	{
 		$template = file_get_contents(dirname(__DIR__) . '/adm/style/acp_advancedpolls_cleanup.html');
