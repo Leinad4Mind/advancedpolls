@@ -2,6 +2,13 @@
 
 All notable changes to Advanced Polls are documented here.
 
+## 1.7.4 - 2026-08-21
+
+- Fixed ACP cleanup result rendering and restored the selected report after cancelling confirmation.
+- Replaced the redundant normalization action with a dedicated cleanup for empty phpBB poll-title wrappers.
+- Fixed confirmed cleanup requests preserving the ACP module route and executing without the original form token.
+- Added explicit handling for invalid confirmations and end-to-end regression tests for the cleanup flow.
+
 ## 1.7.3 - 2026-08-19
 
 - Treated phpBB's `<t></t>` rich-text wrapper as an empty poll title instead of a valid title.

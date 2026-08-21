@@ -58,6 +58,13 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 
 ## Changes by release
 
+### 1.7.4
+
+- Fixed the complete ACP cleanup confirmation round trip, including module routing and native phpBB confirmation validation.
+- Fixed cleanup result rendering and cancellation returning to the correct integrity report.
+- Added a dedicated action for clearing empty phpBB poll-title wrappers while preserving all other poll fields.
+- Added regression tests for initial, accepted, and rejected cleanup confirmations.
+
 ### 1.7.3
 
 - Treated phpBB's `<t></t>` rich-text wrapper as an empty poll title instead of a valid title.
@@ -152,7 +159,7 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
-Always use this disable/replace/enable sequence. Version 1.7.3 includes the poll-data cleanup module, empty stored-title normalization, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
+Always use this disable/replace/enable sequence. Version 1.7.4 includes the poll-data cleanup module, reliable confirmed cleanup actions, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
 
 ## Poll data cleanup
 
