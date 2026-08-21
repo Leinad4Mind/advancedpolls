@@ -62,6 +62,8 @@ class advancedpolls_module
 		{
 			$this->user->add_lang_ext('wolfsblvt/advancedpolls', array('info_acp_advancedpolls', 'acp_cleanup'));
 			$this->render_cleanup(
+				$id,
+				$mode,
 				$phpbb_container->get('wolfsblvt.advancedpolls.poll_cleanup_manager'),
 				$phpbb_container->get('pagination'),
 				$phpbb_container->get('log'),
@@ -128,7 +130,7 @@ class advancedpolls_module
 		$this->page_title = $this->user->lang($display_vars['title']);
 	}
 
-	protected function render_cleanup(poll_cleanup_manager $cleanup, \phpbb\pagination $pagination, $log, $root_path, $php_ext)
+	protected function render_cleanup($id, $mode, poll_cleanup_manager $cleanup, \phpbb\pagination $pagination, $log, $root_path, $php_ext)
 	{
 		// These must be available before any action can raise an ACP notice.
 		$this->tpl_name = 'acp_advancedpolls_cleanup';
@@ -142,7 +144,12 @@ class advancedpolls_module
 
 		if (!$this->request->is_set_post('cancel') && in_array($action, array('selected', 'all', 'empty_wrappers'), true))
 		{
-			if (!check_form_key($this->form_key))
+			$confirmed = confirm_box(true);
+			if (!$confirmed && $this->request->is_set_post('confirm'))
+			{
+				trigger_error($this->user->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+			if (!$confirmed && !check_form_key($this->form_key))
 			{
 				trigger_error($this->user->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
 			}
@@ -157,7 +164,7 @@ class advancedpolls_module
 
 			$summary = $cleanup->get_summary();
 			$requested = $empty_wrappers ? (int) $summary['empty_wrappers'] : ($all_cleanable ? (int) $summary['cleanable'] : count($topic_ids));
-			if (confirm_box(true))
+			if ($confirmed)
 			{
 				if ($empty_wrappers)
 				{
@@ -182,11 +189,11 @@ class advancedpolls_module
 			}
 
 			$hidden = array(
+				'i' => $id,
+				'mode' => $mode,
 				'cleanup_action' => $action,
 				'filter' => $filter,
 				'start' => $start,
-				'form_token' => $this->request->variable('form_token', ''),
-				'creation_time' => $this->request->variable('creation_time', 0),
 			);
 			if (!$empty_wrappers && !$all_cleanable)
 			{

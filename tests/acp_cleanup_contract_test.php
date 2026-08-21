@@ -29,7 +29,12 @@ class acp_cleanup_contract_test extends TestCase
 		$module = file_get_contents(dirname(__DIR__) . '/acp/advancedpolls_module.php');
 
 		$this->assertStringContainsString('check_form_key($this->form_key)', $module);
-		$this->assertStringContainsString('confirm_box(true)', $module);
+		$this->assertStringContainsString('$confirmed = confirm_box(true)', $module);
+		$this->assertStringContainsString('$this->request->is_set_post(\'confirm\')', $module);
+		$this->assertStringContainsString('\'i\' => $id', $module);
+		$this->assertStringContainsString('\'mode\' => $mode', $module);
+		$this->assertStringNotContainsString('\'form_token\' =>', $module);
+		$this->assertStringNotContainsString('\'creation_time\' =>', $module);
 		$this->assertStringContainsString("'LOG_AP_POLL_CLEANUP'", $module);
 		$this->assertStringContainsString('$this->request->is_set_post(\'cancel\')', $module);
 		$this->assertStringContainsString('in_array($action, array(\'selected\', \'all\', \'empty_wrappers\'), true)', $module);
