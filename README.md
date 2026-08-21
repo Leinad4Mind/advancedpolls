@@ -58,6 +58,13 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 
 ## Changes by release
 
+### 1.7.5
+
+- Processes board-wide cleanup in resumable batches of 100 topics with automatic progress.
+- Uses signed continuation links and preserves the canonical ACP module route.
+- Restricts every wrapper update to explicit batch topic IDs and avoids repeating the full integrity report after confirmation.
+- Adds regression coverage for batch cursors, interrupted cleanup and empty batches.
+
 ### 1.7.4
 
 - Fixed the complete ACP cleanup confirmation round trip, including module routing and native phpBB confirmation validation.
@@ -159,7 +166,7 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
-Always use this disable/replace/enable sequence. Version 1.7.4 includes the poll-data cleanup module, reliable confirmed cleanup actions, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
+Always use this disable/replace/enable sequence. Version 1.7.5 includes resumable poll-data cleanup, reliable confirmed cleanup actions, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
 
 ## Poll data cleanup
 
@@ -169,6 +176,7 @@ Only rows with a residual title and no poll options or vote history can be selec
 
 - require ACP board-administrator permission, a valid form token, and explicit confirmation;
 - recheck the database condition immediately before the update;
+- process board-wide operations in resumable batches of 100 topics;
 - create an administrator log entry.
 
 Create a complete database backup before cleanup. Rows with options or vote history are deliberately read-only so their evidence can be investigated manually.

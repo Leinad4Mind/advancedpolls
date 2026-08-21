@@ -2,6 +2,13 @@
 
 All notable changes to Advanced Polls are documented here.
 
+## 1.7.5 - 2026-08-21
+
+- Processed board-wide residual poll cleanup in resumable batches of 100 topics with signed continuation links and visible progress.
+- Removed duplicate ACP routing fields from confirmation forms so the canonical module URL remains authoritative.
+- Avoided repeating the complete integrity summary before an accepted cleanup and restricted wrapper updates to explicit batch topic IDs.
+- Added regression coverage for batch cursors, resumable progress and protection against unintended global updates.
+
 ## 1.7.4 - 2026-08-21
 
 - Fixed ACP cleanup result rendering and restored the selected report after cancelling confirmation.
