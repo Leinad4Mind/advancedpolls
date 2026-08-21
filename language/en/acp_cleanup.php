@@ -59,4 +59,8 @@ $lang = array_merge($lang, array(
 	'AP_CLEANUP_RESULT' => '%d residual topic rows were cleaned.',
 	'AP_CLEANUP_RESULT_DETAIL' => '%1$d residual topic rows were cleaned. %2$d rows were skipped because they now contain options or votes, or no longer have a residual title.',
 	'AP_CLEANUP_EMPTY_WRAPPERS_RESULT' => '%d empty phpBB poll title wrappers were cleaned. Poll options, votes and timing fields were preserved.',
+	'AP_CLEANUP_PROGRESS_TITLE' => 'Cleanup in progress',
+	'AP_CLEANUP_PROGRESS_EXPLAIN' => 'Residual poll data is being cleaned in safe batches of %d topics. This page advances automatically; if it is interrupted, reload the last progress page to resume.',
+	'AP_CLEANUP_PROGRESS' => '%1$d of %2$d candidate rows inspected; %3$d rows cleaned.',
+	'AP_CLEANUP_CONTINUE' => 'Continue cleanup',
 ));

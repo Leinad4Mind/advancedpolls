@@ -162,6 +162,60 @@ class poll_cleanup_manager_test extends TestCase
 		), $manager->cleanup_with_report(array(5, 6, 5)));
 	}
 
+	public function test_cleanup_batch_uses_an_ordered_cursor_and_leaves_the_next_row_for_resume()
+	{
+		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
+		$query = '';
+		$db->expects($this->once())->method('sql_query_limit')->willReturnCallback(function ($sql, $limit) use (&$query) {
+			$query = $sql;
+			$this->assertSame(3, $limit);
+			return 'topics';
+		});
+		$db->method('sql_fetchrow')->willReturnOnConsecutiveCalls(
+			array('topic_id' => 11),
+			array('topic_id' => 12),
+			array('topic_id' => 13),
+			false
+		);
+		$db->expects($this->once())->method('sql_freeresult')->with('topics');
+
+		$manager = $this->getMockBuilder(poll_cleanup_manager::class)
+			->setConstructorArgs(array($db, 'phpbb_'))
+			->onlyMethods(array('cleanup'))
+			->getMock();
+		$manager->expects($this->once())->method('cleanup')->with(array(11, 12))->willReturn(2);
+
+		$this->assertSame(array(
+			'processed' => 2,
+			'cleaned' => 2,
+			'last_topic_id' => 12,
+			'has_more' => true,
+		), $manager->cleanup_batch(10, 2));
+		$this->assertStringContainsString('t.topic_id > 10', $query);
+		$this->assertStringContainsString('ORDER BY t.topic_id ASC', $query);
+	}
+
+	public function test_empty_wrapper_batch_with_no_candidates_never_falls_back_to_global_cleanup()
+	{
+		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
+		$db->expects($this->once())->method('sql_query_limit')->willReturn('topics');
+		$db->expects($this->once())->method('sql_fetchrow')->with('topics')->willReturn(false);
+		$db->expects($this->once())->method('sql_freeresult')->with('topics');
+
+		$manager = $this->getMockBuilder(poll_cleanup_manager::class)
+			->setConstructorArgs(array($db, 'phpbb_'))
+			->onlyMethods(array('cleanup_empty_title_wrappers'))
+			->getMock();
+		$manager->expects($this->never())->method('cleanup_empty_title_wrappers');
+
+		$this->assertSame(array(
+			'processed' => 0,
+			'cleaned' => 0,
+			'last_topic_id' => 50,
+			'has_more' => false,
+		), $manager->cleanup_batch(50, 100, true));
+	}
+
 	public function test_empty_wrapper_cleanup_preserves_every_other_poll_field()
 	{
 		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
@@ -172,6 +226,9 @@ class poll_cleanup_manager_test extends TestCase
 			$transactions[] = $action;
 			return true;
 		});
+		$db->expects($this->once())->method('sql_in_set')
+			->with('phpbb_topics.topic_id', array(5, 6))
+			->willReturn('phpbb_topics.topic_id IN (5, 6)');
 		$db->expects($this->once())->method('sql_build_array')->willReturnCallback(function ($mode, $values) use (&$fields) {
 			$fields = $values;
 			return "poll_title = ''";
@@ -183,11 +240,12 @@ class poll_cleanup_manager_test extends TestCase
 		$db->method('sql_affectedrows')->willReturn(14);
 
 		$manager = new poll_cleanup_manager($db, 'phpbb_');
-		$this->assertSame(14, $manager->cleanup_empty_title_wrappers());
+		$this->assertSame(14, $manager->cleanup_empty_title_wrappers(array(5, 6, 5)));
 		$this->assertSame(array('begin', 'commit'), $transactions);
 		$this->assertSame(array('poll_title' => ''), $fields);
 		$this->assertStringContainsString("phpbb_topics.poll_title = '<t></t>'", $update);
 		$this->assertStringNotContainsString('poll_options', $update);
+		$this->assertStringContainsString('phpbb_topics.topic_id IN (5, 6)', $update);
 		$this->assertStringNotContainsString('poll_votes', $update);
 		$this->assertStringNotContainsString('poll_start', $update);
 	}

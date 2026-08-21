@@ -31,15 +31,18 @@ class acp_cleanup_contract_test extends TestCase
 		$this->assertStringContainsString('check_form_key($this->form_key)', $module);
 		$this->assertStringContainsString('$confirmed = confirm_box(true)', $module);
 		$this->assertStringContainsString('$this->request->is_set_post(\'confirm\')', $module);
-		$this->assertStringContainsString('\'i\' => $id', $module);
-		$this->assertStringContainsString('\'mode\' => $mode', $module);
+		$this->assertStringNotContainsString('\'i\' => $id', $module);
+		$this->assertStringNotContainsString('\'mode\' => $mode', $module);
 		$this->assertStringNotContainsString('\'form_token\' =>', $module);
 		$this->assertStringNotContainsString('\'creation_time\' =>', $module);
 		$this->assertStringContainsString("'LOG_AP_POLL_CLEANUP'", $module);
 		$this->assertStringContainsString('$this->request->is_set_post(\'cancel\')', $module);
 		$this->assertStringContainsString('in_array($action, array(\'selected\', \'all\', \'empty_wrappers\'), true)', $module);
-		$this->assertStringContainsString('$cleanup->cleanup_with_report($topic_ids, $all_cleanable)', $module);
-		$this->assertStringContainsString('$cleanup->cleanup_empty_title_wrappers()', $module);
+		$this->assertStringContainsString('$cleanup->cleanup_with_report($topic_ids)', $module);
+		$this->assertStringContainsString('$cleanup->cleanup_batch($cursor, self::CLEANUP_BATCH_SIZE, $empty_wrappers)', $module);
+		$this->assertStringContainsString('check_link_hash(', $module);
+		$this->assertStringContainsString('generate_link_hash(', $module);
+		$this->assertStringContainsString('meta_refresh(1, $continue_url)', $module);
 		$this->assertStringContainsString("'AP_CLEANUP_RESULT_DETAIL'", $module);
 		$this->assertStringNotContainsString('normalize_empty', $module);
 	}
@@ -71,6 +74,9 @@ class acp_cleanup_contract_test extends TestCase
 		$this->assertStringContainsString('value="all"', $template);
 		$this->assertStringContainsString('value="empty_wrappers"', $template);
 		$this->assertStringContainsString('{EMPTY_WRAPPER_TOTAL}', $template);
+		$this->assertStringContainsString('S_CLEANUP_PROGRESS', $template);
+		$this->assertStringContainsString('<progress', $template);
+		$this->assertStringContainsString('{U_CLEANUP_CONTINUE}', $template);
 		$this->assertStringNotContainsString('normalize_empty', $template);
 		$this->assertStringContainsString('{S_FORM_TOKEN}', $template);
 	}

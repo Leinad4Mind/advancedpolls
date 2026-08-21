@@ -17,6 +17,9 @@ use wolfsblvt\advancedpolls\core\poll_list_order;
 
 class advancedpolls_module
 {
+	const CLEANUP_BATCH_SIZE = 100;
+	const CLEANUP_LINK_PREFIX = 'acp_advancedpolls_cleanup_batch';
+
 	/** @var string The currenct action */
 	public $u_action;
 
@@ -62,8 +65,6 @@ class advancedpolls_module
 		{
 			$this->user->add_lang_ext('wolfsblvt/advancedpolls', array('info_acp_advancedpolls', 'acp_cleanup'));
 			$this->render_cleanup(
-				$id,
-				$mode,
 				$phpbb_container->get('wolfsblvt.advancedpolls.poll_cleanup_manager'),
 				$phpbb_container->get('pagination'),
 				$phpbb_container->get('log'),
@@ -130,7 +131,7 @@ class advancedpolls_module
 		$this->page_title = $this->user->lang($display_vars['title']);
 	}
 
-	protected function render_cleanup($id, $mode, poll_cleanup_manager $cleanup, \phpbb\pagination $pagination, $log, $root_path, $php_ext)
+	protected function render_cleanup(poll_cleanup_manager $cleanup, \phpbb\pagination $pagination, $log, $root_path, $php_ext)
 	{
 		// These must be available before any action can raise an ACP notice.
 		$this->tpl_name = 'acp_advancedpolls_cleanup';
@@ -141,6 +142,23 @@ class advancedpolls_module
 		$filter = poll_cleanup_manager::normalise_filter($this->request->variable('filter', poll_cleanup_manager::FILTER_CLEANABLE));
 		$start = max(0, $this->request->variable('start', 0));
 		$action = $this->request->variable('cleanup_action', '');
+		$batch_action = $this->request->variable('cleanup_batch', '');
+
+		if (in_array($batch_action, array('all', 'empty_wrappers'), true))
+		{
+			$cursor = max(0, $this->request->variable('cleanup_cursor', 0));
+			$total = max(0, $this->request->variable('cleanup_total', 0));
+			$processed = max(0, $this->request->variable('cleanup_processed', 0));
+			$cleaned = max(0, $this->request->variable('cleanup_cleaned', 0));
+			$hash_name = $this->cleanup_hash_name($batch_action, $cursor, $total, $processed, $cleaned);
+			if (!check_link_hash($this->request->variable('hash', ''), $hash_name))
+			{
+				trigger_error($this->user->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
+			$this->run_cleanup_batch($batch_action, $cursor, $total, $processed, $cleaned, $cleanup, $log);
+			return;
+		}
 
 		if (!$this->request->is_set_post('cancel') && in_array($action, array('selected', 'all', 'empty_wrappers'), true))
 		{
@@ -162,21 +180,17 @@ class advancedpolls_module
 				trigger_error($this->user->lang('AP_CLEANUP_NOTHING_SELECTED') . adm_back_link($this->u_action), E_USER_WARNING);
 			}
 
-			$summary = $cleanup->get_summary();
-			$requested = $empty_wrappers ? (int) $summary['empty_wrappers'] : ($all_cleanable ? (int) $summary['cleanable'] : count($topic_ids));
 			if ($confirmed)
 			{
-				if ($empty_wrappers)
+				if ($empty_wrappers || $all_cleanable)
 				{
-					$affected = $cleanup->cleanup_empty_title_wrappers();
-					$message = $this->user->lang('AP_CLEANUP_EMPTY_WRAPPERS_RESULT', $affected);
+					$requested = max(0, $this->request->variable('cleanup_total', 0));
+					$this->run_cleanup_batch($action, 0, $requested, 0, 0, $cleanup, $log);
+					return;
 				}
-				else
-				{
-					$result = $cleanup->cleanup_with_report($topic_ids, $all_cleanable);
-					$affected = $result['cleaned'];
-					$message = $this->user->lang('AP_CLEANUP_RESULT_DETAIL', $result['cleaned'], $result['skipped']);
-				}
+
+				$result = $cleanup->cleanup_with_report($topic_ids);
+				$affected = $result['cleaned'];
 				$log->add(
 					'admin',
 					(int) $this->user->data['user_id'],
@@ -185,15 +199,16 @@ class advancedpolls_module
 					time(),
 					array($affected)
 				);
-				trigger_error($message . adm_back_link($this->u_action), E_USER_NOTICE);
+				trigger_error($this->user->lang('AP_CLEANUP_RESULT_DETAIL', $result['cleaned'], $result['skipped']) . adm_back_link($this->u_action), E_USER_NOTICE);
 			}
 
+			$summary = $cleanup->get_summary();
+			$requested = $empty_wrappers ? (int) $summary['empty_wrappers'] : ($all_cleanable ? (int) $summary['cleanable'] : count($topic_ids));
 			$hidden = array(
-				'i' => $id,
-				'mode' => $mode,
 				'cleanup_action' => $action,
 				'filter' => $filter,
 				'start' => $start,
+				'cleanup_total' => $requested,
 			);
 			if (!$empty_wrappers && !$all_cleanable)
 			{
@@ -272,6 +287,64 @@ class advancedpolls_module
 			'S_HAS_EMPTY_WRAPPERS' => (int) $summary['empty_wrappers'] > 0,
 		));
 
+	}
+
+	/**
+	 * Process one cleanup batch and schedule the next request when required.
+	 */
+	protected function run_cleanup_batch($action, $cursor, $total, $processed, $cleaned, poll_cleanup_manager $cleanup, $log)
+	{
+		$empty_wrappers = $action === 'empty_wrappers';
+		$result = $cleanup->cleanup_batch($cursor, self::CLEANUP_BATCH_SIZE, $empty_wrappers);
+		$processed += (int) $result['processed'];
+		$cleaned += (int) $result['cleaned'];
+
+		if ($result['has_more'])
+		{
+			$cursor = (int) $result['last_topic_id'];
+			$hash_name = $this->cleanup_hash_name($action, $cursor, $total, $processed, $cleaned);
+			$continue_url = $this->u_action
+				. '&amp;cleanup_batch=' . urlencode($action)
+				. '&amp;cleanup_cursor=' . $cursor
+				. '&amp;cleanup_total=' . $total
+				. '&amp;cleanup_processed=' . $processed
+				. '&amp;cleanup_cleaned=' . $cleaned
+				. '&amp;hash=' . generate_link_hash($hash_name);
+			meta_refresh(1, $continue_url);
+
+			$this->template->assign_vars(array(
+				'S_CLEANUP_PROGRESS' => true,
+				'CLEANUP_PROGRESS_EXPLAIN' => $this->user->lang('AP_CLEANUP_PROGRESS_EXPLAIN', self::CLEANUP_BATCH_SIZE),
+				'CLEANUP_PROGRESS_VALUE' => min($processed, max(1, $total)),
+				'CLEANUP_PROGRESS_TOTAL' => max(1, $total),
+				'CLEANUP_PROGRESS_PERCENT' => $total > 0 ? min(100, round(($processed / $total) * 100, 2)) : 100,
+				'CLEANUP_PROGRESS_TEXT' => $this->user->lang('AP_CLEANUP_PROGRESS', $processed, $total, $cleaned),
+				'U_CLEANUP_CONTINUE' => $continue_url,
+			));
+			return;
+		}
+
+		$skipped = max(0, $total - $cleaned);
+		$log->add(
+			'admin',
+			(int) $this->user->data['user_id'],
+			$this->user->ip,
+			'LOG_AP_POLL_CLEANUP',
+			time(),
+			array($cleaned)
+		);
+		$message = $empty_wrappers
+			? $this->user->lang('AP_CLEANUP_EMPTY_WRAPPERS_RESULT', $cleaned)
+			: $this->user->lang('AP_CLEANUP_RESULT_DETAIL', $cleaned, $skipped);
+		trigger_error($message . adm_back_link($this->u_action), E_USER_NOTICE);
+	}
+
+	/**
+	 * Bind every continuation parameter to the session-scoped phpBB link hash.
+	 */
+	protected function cleanup_hash_name($action, $cursor, $total, $processed, $cleaned)
+	{
+		return self::CLEANUP_LINK_PREFIX . '_' . $action . '_' . (int) $cursor . '_' . (int) $total . '_' . (int) $processed . '_' . (int) $cleaned;
 	}
 
 	/**

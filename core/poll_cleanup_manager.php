@@ -133,6 +133,58 @@ class poll_cleanup_manager
 	}
 
 	/**
+	 * Clean one resumable batch of residual topic rows.
+	 *
+	 * @param int $after_topic_id Continue after this topic ID
+	 * @param int $limit Maximum number of rows to inspect
+	 * @param bool $empty_wrappers Only clear empty phpBB title wrappers
+	 * @return array
+	 */
+	public function cleanup_batch($after_topic_id, $limit, $empty_wrappers = false)
+	{
+		$after_topic_id = max(0, (int) $after_topic_id);
+		$limit = max(1, min(500, (int) $limit));
+		$topics_table = $this->table_prefix . 'topics';
+		$condition = $empty_wrappers
+			? poll_integrity::empty_wrapper_condition('t')
+			: $this->condition_for_filter(self::FILTER_CLEANABLE);
+
+		$sql = 'SELECT t.topic_id
+			FROM ' . $topics_table . ' t
+			WHERE t.topic_id > ' . $after_topic_id . '
+				AND ' . $condition . '
+			ORDER BY t.topic_id ASC';
+		$result = $this->db->sql_query_limit($sql, $limit + 1);
+		$topic_ids = array();
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$topic_ids[] = (int) $row['topic_id'];
+		}
+		$this->db->sql_freeresult($result);
+
+		$has_more = count($topic_ids) > $limit;
+		if ($has_more)
+		{
+			array_pop($topic_ids);
+		}
+
+		$cleaned = 0;
+		if ($topic_ids)
+		{
+			$cleaned = $empty_wrappers
+				? $this->cleanup_empty_title_wrappers($topic_ids)
+				: $this->cleanup($topic_ids);
+		}
+
+		return array(
+			'processed' => count($topic_ids),
+			'cleaned' => $cleaned,
+			'last_topic_id' => $topic_ids ? max($topic_ids) : $after_topic_id,
+			'has_more' => $has_more,
+		);
+	}
+
+	/**
 	 * Clear only topic metadata which still has a title but no poll options.
 	 *
 	 * @param array $topic_ids Selected topic IDs
@@ -188,19 +240,28 @@ class poll_cleanup_manager
 	/**
 	 * Clear only phpBB's empty rich-text poll title wrapper.
 	 *
+	 * @param array $topic_ids Topic IDs selected by the current batch
 	 * @return int Number of cleaned topic rows
 	 */
-	public function cleanup_empty_title_wrappers()
+	public function cleanup_empty_title_wrappers(array $topic_ids)
 	{
+		$topic_ids = array_values(array_unique(array_filter(array_map('intval', $topic_ids))));
+		if (!$topic_ids)
+		{
+			return 0;
+		}
+
 		$topics_table = $this->table_prefix . 'topics';
 		$fields = array('poll_title' => '');
+		$where = poll_integrity::empty_wrapper_condition($topics_table);
+		$where .= ' AND ' . $this->db->sql_in_set($topics_table . '.topic_id', $topic_ids);
 
 		$this->db->sql_transaction('begin');
 		try
 		{
 			$sql = 'UPDATE ' . $topics_table . '
 				SET ' . $this->db->sql_build_array('UPDATE', $fields) . '
-				WHERE ' . poll_integrity::empty_wrapper_condition($topics_table);
+				WHERE ' . $where;
 			$this->db->sql_query($sql);
 			$affected = (int) $this->db->sql_affectedrows();
 			$this->db->sql_transaction('commit');

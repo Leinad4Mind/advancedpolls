@@ -3,6 +3,22 @@
 <a id="maincontent"></a>
 
 <h1>{L_AP_CLEANUP_TITLE}</h1>
+
+<!-- IF S_CLEANUP_PROGRESS -->
+	<p>{CLEANUP_PROGRESS_EXPLAIN}</p>
+	<fieldset>
+		<legend>{L_AP_CLEANUP_PROGRESS_TITLE}</legend>
+		<div class='centered-text'>
+			<br />
+			<progress value='{CLEANUP_PROGRESS_VALUE}' max='{CLEANUP_PROGRESS_TOTAL}' style='height: 2em; width: 20em;'></progress><br />
+			<strong>{CLEANUP_PROGRESS_PERCENT}%</strong><br />
+			{CLEANUP_PROGRESS_TEXT}
+		</div>
+		<p class='submit-buttons'>
+			<a class='button1' href='{U_CLEANUP_CONTINUE}'>{L_AP_CLEANUP_CONTINUE}</a>
+		</p>
+	</fieldset>
+<!-- ELSE -->
 <p>{L_AP_CLEANUP_EXPLAIN}</p>
 
 <div class="errorbox notice">
@@ -109,5 +125,6 @@ if (apCleanupSelectPage) {
 	});
 }
 </script>
+<!-- ENDIF -->
 
 <!-- INCLUDE overall_footer.html -->

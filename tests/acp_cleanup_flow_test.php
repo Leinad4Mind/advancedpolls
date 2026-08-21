@@ -17,6 +17,11 @@ namespace wolfsblvt\advancedpolls\acp
 		public static $confirm_displays = 0;
 		public static $form_key_checks = 0;
 		public static $hidden_fields = array();
+		public static $link_hash_valid = true;
+		public static $checked_hash_names = array();
+		public static $generated_hash_names = array();
+		public static $meta_refresh_url = '';
+		public static $template_vars = array();
 
 		public static function reset()
 		{
@@ -26,6 +31,11 @@ namespace wolfsblvt\advancedpolls\acp
 			self::$confirm_displays = 0;
 			self::$form_key_checks = 0;
 			self::$hidden_fields = array();
+			self::$link_hash_valid = true;
+			self::$checked_hash_names = array();
+			self::$generated_hash_names = array();
+			self::$meta_refresh_url = '';
+			self::$template_vars = array();
 		}
 	}
 
@@ -70,6 +80,25 @@ namespace wolfsblvt\advancedpolls\acp
 		return ' [' . $url . ']';
 	}
 
+	function check_link_hash($hash, $link_name)
+	{
+		cleanup_flow_spy::$checked_hash_names[] = $link_name;
+
+		return cleanup_flow_spy::$link_hash_valid;
+	}
+
+	function generate_link_hash($link_name)
+	{
+		cleanup_flow_spy::$generated_hash_names[] = $link_name;
+
+		return 'generated-hash';
+	}
+
+	function meta_refresh($time, $url)
+	{
+		cleanup_flow_spy::$meta_refresh_url = $url;
+	}
+
 	function trigger_error($message, $severity = E_USER_NOTICE)
 	{
 		throw new cleanup_flow_notice($message, $severity);
@@ -102,17 +131,16 @@ namespace wolfsblvt\advancedpolls\tests
 			$cleanup = $this->createMock(poll_cleanup_manager::class);
 			$cleanup->expects($this->once())->method('get_summary')->willReturn($this->summary());
 
-			$this->module($request)->run_cleanup('module-id', 'cleanup', $cleanup, $this->pagination(), new cleanup_log_stub());
+			$this->module($request)->run_cleanup($cleanup, $this->pagination(), new cleanup_log_stub());
 
 			$this->assertSame(1, cleanup_flow_spy::$confirm_checks);
 			$this->assertSame(1, cleanup_flow_spy::$form_key_checks);
 			$this->assertSame(1, cleanup_flow_spy::$confirm_displays);
 			$this->assertSame(array(
-				'i' => 'module-id',
-				'mode' => 'cleanup',
 				'cleanup_action' => 'selected',
 				'filter' => poll_cleanup_manager::FILTER_CLEANABLE,
 				'start' => 50,
+				'cleanup_total' => 2,
 				'topic_ids' => array(4463, 4462),
 			), cleanup_flow_spy::$hidden_fields);
 		}
@@ -123,18 +151,19 @@ namespace wolfsblvt\advancedpolls\tests
 			$request = new cleanup_request_stub(array(
 				'cleanup_action' => 'all',
 				'filter' => poll_cleanup_manager::FILTER_CLEANABLE,
+				'cleanup_total' => 2,
 			), array('confirm'));
 			$cleanup = $this->createMock(poll_cleanup_manager::class);
-			$cleanup->expects($this->once())->method('get_summary')->willReturn($this->summary());
+			$cleanup->expects($this->never())->method('get_summary');
 			$cleanup->expects($this->once())
-				->method('cleanup_with_report')
-				->with(array(), true)
-				->willReturn(array('requested' => 2711, 'cleaned' => 2711, 'skipped' => 0));
+				->method('cleanup_batch')
+				->with(0, 100, false)
+				->willReturn(array('processed' => 2, 'cleaned' => 2, 'last_topic_id' => 4463, 'has_more' => false));
 			$log = new cleanup_log_stub();
 
 			try
 			{
-				$this->module($request)->run_cleanup('module-id', 'cleanup', $cleanup, $this->pagination(), $log);
+				$this->module($request)->run_cleanup($cleanup, $this->pagination(), $log);
 				$this->fail('The ACP success notice was not raised.');
 			}
 			catch (cleanup_flow_notice $notice)
@@ -156,10 +185,11 @@ namespace wolfsblvt\advancedpolls\tests
 			$cleanup = $this->createMock(poll_cleanup_manager::class);
 			$cleanup->expects($this->never())->method('get_summary');
 			$cleanup->expects($this->never())->method('cleanup_with_report');
+			$cleanup->expects($this->never())->method('cleanup_batch');
 
 			try
 			{
-				$this->module($request)->run_cleanup('module-id', 'cleanup', $cleanup, $this->pagination(), new cleanup_log_stub());
+				$this->module($request)->run_cleanup($cleanup, $this->pagination(), new cleanup_log_stub());
 				$this->fail('An invalid confirmation was accepted silently.');
 			}
 			catch (cleanup_flow_notice $notice)
@@ -170,6 +200,34 @@ namespace wolfsblvt\advancedpolls\tests
 			$this->assertSame(1, cleanup_flow_spy::$confirm_checks);
 			$this->assertSame(0, cleanup_flow_spy::$form_key_checks);
 			$this->assertSame(0, cleanup_flow_spy::$confirm_displays);
+		}
+
+		public function test_signed_continuation_processes_one_batch_and_can_be_resumed()
+		{
+			$request = new cleanup_request_stub(array(
+				'cleanup_batch' => 'all',
+				'cleanup_cursor' => 100,
+				'cleanup_total' => 250,
+				'cleanup_processed' => 100,
+				'cleanup_cleaned' => 100,
+				'hash' => 'valid-hash',
+			));
+			$cleanup = $this->createMock(poll_cleanup_manager::class);
+			$cleanup->expects($this->once())
+				->method('cleanup_batch')
+				->with(100, 100, false)
+				->willReturn(array('processed' => 100, 'cleaned' => 99, 'last_topic_id' => 200, 'has_more' => true));
+			$log = new cleanup_log_stub();
+
+			$this->module($request)->run_cleanup($cleanup, $this->pagination(), $log);
+
+			$this->assertSame(array('acp_advancedpolls_cleanup_batch_all_100_250_100_100'), cleanup_flow_spy::$checked_hash_names);
+			$this->assertSame(array('acp_advancedpolls_cleanup_batch_all_200_250_200_199'), cleanup_flow_spy::$generated_hash_names);
+			$this->assertStringContainsString('cleanup_cursor=200', cleanup_flow_spy::$meta_refresh_url);
+			$this->assertStringContainsString('cleanup_cleaned=199', cleanup_flow_spy::$meta_refresh_url);
+			$this->assertTrue(cleanup_flow_spy::$template_vars['S_CLEANUP_PROGRESS']);
+			$this->assertSame(200, cleanup_flow_spy::$template_vars['CLEANUP_PROGRESS_VALUE']);
+			$this->assertCount(0, $log->entries);
 		}
 
 		private function module($request)
@@ -205,12 +263,20 @@ namespace wolfsblvt\advancedpolls\tests
 		{
 			$this->user = $user;
 			$this->request = $request;
-			$this->template = new \stdClass();
+			$this->template = new cleanup_template_stub();
 		}
 
-		public function run_cleanup($id, $mode, poll_cleanup_manager $cleanup, \phpbb\pagination $pagination, $log)
+		public function run_cleanup(poll_cleanup_manager $cleanup, \phpbb\pagination $pagination, $log)
 		{
-			$this->render_cleanup($id, $mode, $cleanup, $pagination, $log, './', 'php');
+			$this->render_cleanup($cleanup, $pagination, $log, './', 'php');
+		}
+	}
+
+	class cleanup_template_stub
+	{
+		public function assign_vars(array $variables)
+		{
+			cleanup_flow_spy::$template_vars = array_merge(cleanup_flow_spy::$template_vars, $variables);
 		}
 	}
 
