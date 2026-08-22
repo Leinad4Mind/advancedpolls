@@ -141,8 +141,23 @@ class advancedpolls_module
 		add_form_key($this->form_key);
 		$filter = poll_cleanup_manager::normalise_filter($this->request->variable('filter', poll_cleanup_manager::FILTER_CLEANABLE));
 		$start = max(0, $this->request->variable('start', 0));
-		$action = $this->request->variable('cleanup_action', '');
+		$action = $this->request->variable(
+			'cleanup_action',
+			'',
+			false,
+			\phpbb\request\request_interface::POST
+		);
 		$batch_action = $this->request->variable('cleanup_batch', '');
+		$valid_actions = array('selected', 'all', 'empty_wrappers');
+		$is_confirmation = $this->request->is_set_post('confirm');
+
+		// Never turn a confirmed destructive request with missing state into an
+		// ordinary page view. Some PHP/proxy configurations do not populate the
+		// aggregate REQUEST bag consistently even though the POST body is intact.
+		if ($is_confirmation && !in_array($action, $valid_actions, true))
+		{
+			trigger_error($this->user->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
+		}
 
 		if (in_array($batch_action, array('all', 'empty_wrappers'), true))
 		{
@@ -160,7 +175,7 @@ class advancedpolls_module
 			return;
 		}
 
-		if (!$this->request->is_set_post('cancel') && in_array($action, array('selected', 'all', 'empty_wrappers'), true))
+		if (!$this->request->is_set_post('cancel') && in_array($action, $valid_actions, true))
 		{
 			$confirmed = confirm_box(true);
 			if (!$confirmed && $this->request->is_set_post('confirm'))
@@ -172,7 +187,12 @@ class advancedpolls_module
 				trigger_error($this->user->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
 			}
 
-			$topic_ids = array_values(array_unique(array_filter(array_map('intval', $this->request->variable('topic_ids', array(0))))));
+			$topic_ids = array_values(array_unique(array_filter(array_map('intval', $this->request->variable(
+				'topic_ids',
+				array(0),
+				false,
+				\phpbb\request\request_interface::POST
+			)))));
 			$all_cleanable = $action === 'all';
 			$empty_wrappers = $action === 'empty_wrappers';
 			if (!$empty_wrappers && !$all_cleanable && !$topic_ids)
@@ -184,7 +204,12 @@ class advancedpolls_module
 			{
 				if ($empty_wrappers || $all_cleanable)
 				{
-					$requested = max(0, $this->request->variable('cleanup_total', 0));
+					$requested = max(0, $this->request->variable(
+						'cleanup_total',
+						0,
+						false,
+						\phpbb\request\request_interface::POST
+					));
 					$this->run_cleanup_batch($action, 0, $requested, 0, 0, $cleanup, $log);
 					return;
 				}

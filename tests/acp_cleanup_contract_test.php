@@ -31,13 +31,16 @@ class acp_cleanup_contract_test extends TestCase
 		$this->assertStringContainsString('check_form_key($this->form_key)', $module);
 		$this->assertStringContainsString('$confirmed = confirm_box(true)', $module);
 		$this->assertStringContainsString('$this->request->is_set_post(\'confirm\')', $module);
+		$this->assertStringContainsString('\\phpbb\\request\\request_interface::POST', $module);
+		$this->assertStringContainsString('if ($is_confirmation && !in_array($action, $valid_actions, true))', $module);
 		$this->assertStringNotContainsString('\'i\' => $id', $module);
 		$this->assertStringNotContainsString('\'mode\' => $mode', $module);
 		$this->assertStringNotContainsString('\'form_token\' =>', $module);
 		$this->assertStringNotContainsString('\'creation_time\' =>', $module);
 		$this->assertStringContainsString("'LOG_AP_POLL_CLEANUP'", $module);
 		$this->assertStringContainsString('$this->request->is_set_post(\'cancel\')', $module);
-		$this->assertStringContainsString('in_array($action, array(\'selected\', \'all\', \'empty_wrappers\'), true)', $module);
+		$this->assertStringContainsString('$valid_actions = array(\'selected\', \'all\', \'empty_wrappers\')', $module);
+		$this->assertStringContainsString('in_array($action, $valid_actions, true)', $module);
 		$this->assertStringContainsString('$cleanup->cleanup_with_report($topic_ids)', $module);
 		$this->assertStringContainsString('$cleanup->cleanup_batch($cursor, self::CLEANUP_BATCH_SIZE, $empty_wrappers)', $module);
 		$this->assertStringContainsString('check_link_hash(', $module);

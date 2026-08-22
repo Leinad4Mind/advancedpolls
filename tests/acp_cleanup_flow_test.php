@@ -202,6 +202,27 @@ namespace wolfsblvt\advancedpolls\tests
 			$this->assertSame(0, cleanup_flow_spy::$confirm_displays);
 		}
 
+		public function test_confirmation_with_missing_action_never_falls_through_silently()
+		{
+			$request = new cleanup_request_stub(array(), array('confirm'));
+			$cleanup = $this->createMock(poll_cleanup_manager::class);
+			$cleanup->expects($this->never())->method('get_summary');
+			$cleanup->expects($this->never())->method('cleanup_with_report');
+			$cleanup->expects($this->never())->method('cleanup_batch');
+
+			try
+			{
+				$this->module($request)->run_cleanup($cleanup, $this->pagination(), new cleanup_log_stub());
+				$this->fail('A confirmation without its cleanup action was accepted silently.');
+			}
+			catch (cleanup_flow_notice $notice)
+			{
+				$this->assertStringContainsString('FORM_INVALID', $notice->getMessage());
+			}
+
+			$this->assertSame(0, cleanup_flow_spy::$confirm_checks);
+		}
+
 		public function test_signed_continuation_processes_one_batch_and_can_be_resumed()
 		{
 			$request = new cleanup_request_stub(array(
@@ -291,7 +312,7 @@ namespace wolfsblvt\advancedpolls\tests
 			$this->post_fields = $post_fields;
 		}
 
-		public function variable($name, $default, $multibyte = false)
+		public function variable($name, $default, $multibyte = false, $super_global = null)
 		{
 			return array_key_exists($name, $this->variables) ? $this->variables[$name] : $default;
 		}
