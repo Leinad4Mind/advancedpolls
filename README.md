@@ -58,6 +58,12 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 
 ## Changes by release
 
+### 1.7.6
+
+- Reads confirmed cleanup actions, selected topic IDs and batch totals explicitly from POST.
+- Rejects malformed confirmation submissions instead of silently returning to an unchanged report.
+- Adds regression coverage for server and proxy configurations where phpBB's aggregate request bag loses confirmation state.
+
 ### 1.7.5
 
 - Processes board-wide cleanup in resumable batches of 100 topics with automatic progress.
@@ -166,7 +172,7 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
-Always use this disable/replace/enable sequence. Version 1.7.5 includes resumable poll-data cleanup, reliable confirmed cleanup actions, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
+Always use this disable/replace/enable sequence. Version 1.7.6 includes resumable poll-data cleanup, explicit POST handling for confirmed cleanup actions, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
 
 ## Poll data cleanup
 

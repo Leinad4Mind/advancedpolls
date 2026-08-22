@@ -20,7 +20,7 @@ class package_validation_test extends TestCase
 
 		$this->assertSame(JSON_ERROR_NONE, json_last_error());
 		$this->assertSame('phpbb-extension', $composer['type']);
-		$this->assertSame('1.7.5', $composer['version']);
+		$this->assertSame('1.7.6', $composer['version']);
 		$this->assertSame('>=7.1.3', $composer['require']['php']);
 		$this->assertSame('>=3.3.0,<4.0.0@dev', $composer['extra']['soft-require']['phpbb/phpbb']);
 		$this->assertSame('https://github.com/Leinad4Mind/advancedpolls', $composer['homepage']);

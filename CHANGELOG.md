@@ -2,6 +2,13 @@
 
 All notable changes to Advanced Polls are documented here.
 
+## 1.7.6 - 2026-08-22
+
+- Fixed confirmed ACP cleanup requests reading destructive action state from phpBB's aggregate request bag on affected server and proxy configurations.
+- Read cleanup actions, selected topic IDs and batch totals explicitly from the POST body.
+- Reject malformed confirmation submissions instead of silently returning to the unchanged cleanup report.
+- Added regression coverage for missing confirmation state and explicit POST transport.
+
 ## 1.7.5 - 2026-08-21
 
 - Processed board-wide residual poll cleanup in resumable batches of 100 topics with signed continuation links and visible progress.
