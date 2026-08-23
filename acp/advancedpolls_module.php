@@ -240,12 +240,17 @@ class advancedpolls_module
 				$hidden['topic_ids'] = $topic_ids;
 			}
 			$confirm_key = $empty_wrappers ? 'AP_CLEANUP_CONFIRM_EMPTY_WRAPPERS' : ($all_cleanable ? 'AP_CLEANUP_CONFIRM_ALL' : 'AP_CLEANUP_CONFIRM_SELECTED');
+			// No $u_action here, deliberately. phpBB feeds whatever is passed through
+			// path_helper::get_valid_page(), which prefixes it with the board root path. Our
+			// $u_action is relative to adm/ ("./index.php?..."), so prefixing turns it into
+			// "./.././index.php?...", and the confirmation form posts to the board index
+			// instead of the ACP: the admin clicks Yes and nothing happens. Left out, phpBB
+			// uses $user->page['page'] ("adm/index.php?...") which survives that prefixing.
+			// Every core ACP module omits it for the same reason.
 			confirm_box(
 				false,
 				$this->user->lang($confirm_key, $requested),
-				build_hidden_fields($hidden),
-				'confirm_body.html',
-				$this->u_action
+				build_hidden_fields($hidden)
 			);
 			return;
 		}

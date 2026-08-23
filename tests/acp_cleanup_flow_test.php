@@ -15,6 +15,7 @@ namespace wolfsblvt\advancedpolls\acp
 		public static $form_key_valid = true;
 		public static $confirm_checks = 0;
 		public static $confirm_displays = 0;
+		public static $confirm_u_action = null;
 		public static $form_key_checks = 0;
 		public static $hidden_fields = array();
 		public static $link_hash_valid = true;
@@ -29,6 +30,7 @@ namespace wolfsblvt\advancedpolls\acp
 			self::$form_key_valid = true;
 			self::$confirm_checks = 0;
 			self::$confirm_displays = 0;
+			self::$confirm_u_action = null;
 			self::$form_key_checks = 0;
 			self::$hidden_fields = array();
 			self::$link_hash_valid = true;
@@ -64,6 +66,7 @@ namespace wolfsblvt\advancedpolls\acp
 		}
 
 		cleanup_flow_spy::$confirm_displays++;
+		cleanup_flow_spy::$confirm_u_action = $u_action;
 
 		return false;
 	}
@@ -136,6 +139,11 @@ namespace wolfsblvt\advancedpolls\tests
 			$this->assertSame(1, cleanup_flow_spy::$confirm_checks);
 			$this->assertSame(1, cleanup_flow_spy::$form_key_checks);
 			$this->assertSame(1, cleanup_flow_spy::$confirm_displays);
+			// The confirmation form must be left to phpBB's own default action. Anything passed
+			// here goes through path_helper::get_valid_page(), which prefixes it with the board
+			// root path; our adm-relative u_action would become "./.././index.php?..." and the
+			// form would post to the board index, so clicking Yes would do nothing at all.
+			$this->assertSame('', cleanup_flow_spy::$confirm_u_action);
 			$this->assertSame(array(
 				'cleanup_action' => 'selected',
 				'filter' => poll_cleanup_manager::FILTER_CLEANABLE,
@@ -254,7 +262,7 @@ namespace wolfsblvt\advancedpolls\tests
 		private function module($request)
 		{
 			$module = new testable_advancedpolls_module();
-			$module->u_action = 'adm/index.php?i=module-id&amp;mode=cleanup';
+			$module->u_action = './index.php?i=module-id&amp;mode=cleanup'; // phpBB builds this relative to adm/
 			$module->set_dependencies(new cleanup_user_stub(), $request);
 
 			return $module;
