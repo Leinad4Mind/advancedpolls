@@ -58,6 +58,12 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 
 ## Changes by release
 
+### 1.7.7
+
+- Keeps cleanup confirmation forms inside the ACP when phpBB supplies an ACP-relative module action.
+- Lets phpBB select its canonical confirmation target so accepted cleanup requests no longer post to the board index.
+- Adds regression coverage for the confirmation form action.
+
 ### 1.7.6
 
 - Reads confirmed cleanup actions, selected topic IDs and batch totals explicitly from POST.
@@ -172,7 +178,7 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
-Always use this disable/replace/enable sequence. Version 1.7.6 includes resumable poll-data cleanup, explicit POST handling for confirmed cleanup actions, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
+Always use this disable/replace/enable sequence. Version 1.7.7 includes the corrected ACP confirmation target, explicit POST handling for confirmed cleanup actions, resumable poll-data cleanup, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
 
 ## Poll data cleanup
 

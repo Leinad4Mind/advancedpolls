@@ -2,6 +2,12 @@
 
 All notable changes to Advanced Polls are documented here.
 
+## 1.7.7 - 2026-08-23
+
+- Fixed ACP cleanup confirmation forms posting to the board index when phpBB supplied an ACP-relative module action.
+- Let phpBB select its canonical confirmation target so accepted cleanup requests remain inside the ACP.
+- Added regression coverage for the confirmation form action.
+
 ## 1.7.6 - 2026-08-22
 
 - Fixed confirmed ACP cleanup requests reading destructive action state from phpBB's aggregate request bag on affected server and proxy configurations.
