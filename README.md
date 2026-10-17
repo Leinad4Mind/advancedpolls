@@ -58,6 +58,13 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 
 ## Changes by release
 
+### 1.7.8
+
+- Keeps posts and edits submittable when the poll panel renders "Options per user" as 0, which happened on every first post of a topic without a poll.
+- Clamps the posting form's options-per-user and scoring values to at least one so legacy topic rows cannot leave an invalid number field inside the hidden poll tab.
+- Aligns the options-per-user field with phpBB's own minimum so an out-of-range value reports a board error instead of blocking the form silently.
+- Adds regression coverage for the posting template values.
+
 ### 1.7.7
 
 - Keeps cleanup confirmation forms inside the ACP when phpBB supplies an ACP-relative module action.
@@ -178,7 +185,7 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
-Always use this disable/replace/enable sequence. Version 1.7.7 includes the corrected ACP confirmation target, explicit POST handling for confirmed cleanup actions, resumable poll-data cleanup, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
+Always use this disable/replace/enable sequence. Version 1.7.8 includes the posting-form fix for the options-per-user field, the corrected ACP confirmation target, explicit POST handling for confirmed cleanup actions, resumable poll-data cleanup, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
 
 ## Poll data cleanup
 

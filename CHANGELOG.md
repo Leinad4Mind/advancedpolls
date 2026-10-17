@@ -2,6 +2,13 @@
 
 All notable changes to Advanced Polls are documented here.
 
+## 1.7.8 - 2026-10-17
+
+- Fixed posts and edits silently refusing to submit when the poll panel rendered "Options per user" as 0, which happened on every first post of a topic without a poll.
+- Clamped the posting form's options-per-user and scoring values to at least 1 so legacy topic rows cannot leave an invalid number field inside the hidden poll tab.
+- Aligned the extension's options-per-user field with phpBB's own minimum so an out-of-range value produces a visible board error instead of a dead submit button.
+- Added regression coverage for the posting template values.
+
 ## 1.7.7 - 2026-08-23
 
 - Fixed ACP cleanup confirmation forms posting to the board index when phpBB supplied an ACP-relative module action.
