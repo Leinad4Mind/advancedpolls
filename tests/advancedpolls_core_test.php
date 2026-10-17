@@ -209,6 +209,44 @@ class advancedpolls_core_test extends TestCase
 		$this->assertStringContainsString('value="1"', $page_data['AP_RANK_POINT_INPUTS']);
 	}
 
+	public function test_posting_template_never_renders_a_zero_options_per_user_field()
+	{
+		$core = $this->create_core(array(), array('wolfsblvt.advancedpolls.activate_poll_scoring' => 1));
+		$post_data = array(
+			'poll_length' => 0,
+			'poll_title' => '',
+			'poll_options' => array(),
+		);
+		// phpBB hands over topics.poll_max_options, which is 0 for a topic without a poll.
+		$page_data = array('S_SHOW_POLL_BOX' => true, 'POLL_MAX_OPTIONS' => 0);
+
+		$core->config_for_polls_to_template($post_data, $page_data);
+
+		$this->assertSame(1, $page_data['POLL_MAX_OPTIONS']);
+	}
+
+	public function test_posting_template_keeps_configured_options_per_user_and_lifts_legacy_scoring_zeroes()
+	{
+		$core = $this->create_core(array(), array('wolfsblvt.advancedpolls.activate_poll_scoring' => 1));
+		$post_data = array(
+			'poll_length' => 0,
+			'poll_title' => 'Pick three',
+			'poll_options' => array('A', 'B', 'C', 'D'),
+			'wolfsblvt_poll_type' => poll_options::TYPE_SCORING,
+			'wolfsblvt_poll_min_value' => 0,
+			'wolfsblvt_poll_max_value' => 5,
+			'wolfsblvt_poll_total_value' => 0,
+		);
+		$page_data = array('S_SHOW_POLL_BOX' => true, 'POLL_MAX_OPTIONS' => 3);
+
+		$core->config_for_polls_to_template($post_data, $page_data);
+
+		$this->assertSame(3, $page_data['POLL_MAX_OPTIONS']);
+		$this->assertSame(1, $page_data['WOLFSBLVT_POLL_MIN_VALUE']);
+		$this->assertSame(5, $page_data['WOLFSBLVT_POLL_MAX_VALUE']);
+		$this->assertSame(1, $page_data['WOLFSBLVT_POLL_TOTAL_VALUE']);
+	}
+
 	public function test_ajax_private_results_are_redacted_without_removing_own_votes()
 	{
 		$core = $this->create_core(array(), array(), true);

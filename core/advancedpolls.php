@@ -294,6 +294,17 @@ class advancedpolls
 		{
 			$page_data['S_POLL_VOTE_CHANGE'] = false;
 		}
+
+		// phpBB fills this field from topics.poll_max_options, which is 0 for topics
+		// without a poll. Our own field is rendered with a minimum of one option, so a
+		// 0 would make the browser refuse the whole posting form, and the poll panel is
+		// hidden behind a tab, so no validation message can even be shown. phpBB clamps
+		// the stored value the same way whenever a poll is saved.
+		if (!empty($page_data['S_SHOW_POLL_BOX']))
+		{
+			$page_data['POLL_MAX_OPTIONS'] = max(1, isset($page_data['POLL_MAX_OPTIONS']) ? (int) $page_data['POLL_MAX_OPTIONS'] : 1);
+		}
+
 		$options = $this->get_possible_options();
 		if (!empty($this->config['wolfsblvt.advancedpolls.activate_poll_start']))
 		{
@@ -366,6 +377,13 @@ class advancedpolls
 			if ($option == 'wolfsblvt_poll_end_year')
 			{
 				$page_data['WOLFSBLVT_POLL_END'] = true;
+			}
+
+			// The scoring inputs are rendered with a minimum of 1 too, so keep legacy
+			// zeroes out of them for the same reason as POLL_MAX_OPTIONS above.
+			if (!is_bool($value_to_take) && in_array($option, ['wolfsblvt_poll_min_value', 'wolfsblvt_poll_max_value', 'wolfsblvt_poll_total_value'], true))
+			{
+				$value_to_take = max(1, (int) $value_to_take);
 			}
 
 			if (is_bool($value_to_take))
