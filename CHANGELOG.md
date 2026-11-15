@@ -2,6 +2,17 @@
 
 All notable changes to Advanced Polls are documented here.
 
+## 1.7.9 - 2026-11-15
+
+- Fixed the "Limit votes" option only hiding the voting form: a member who had not posted in the topic could still vote in a single-question poll by sending the vote request directly. The vote is now refused before phpBB stores it.
+- Guests can no longer vote in a poll limited to members who posted in the topic, matching multi-question polls; before, one guest post made the poll open to every guest.
+- The voting form and the vote itself now share a single check, run once per topic, so the `wolfsblvt.advancedpolls.modify_poll_limit` event applies to both.
+- Added regression coverage for refused, accepted and guest votes.
+- Fixed voting in multi-question polls, which failed with an SQL error since 1.4.0 because `forum_status` was read from the topics table. The vote response now also loads its confirmation message and shows the totals of the topic's own first question instead of matching option numbers from other polls.
+- Translated the poll data cleanup page into every shipped language.
+- Escaped output with phpBB's `utf8_htmlspecialchars()` and cast or escaped every dynamic value where SQL conditions are built, as the Extension Pre Validator expects.
+- Declared the licence in `composer.json` as `GPL-2.0-only`, the current SPDX identifier for the same GPL version 2 licence.
+
 ## 1.7.8 - 2026-10-17
 
 - Fixed posts and edits silently refusing to submit when the poll panel rendered "Options per user" as 0, which happened on every first post of a topic without a poll.

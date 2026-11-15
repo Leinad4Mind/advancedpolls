@@ -58,6 +58,15 @@ Advanced Polls extends phpBB's poll system with scheduled starts, configurable v
 
 ## Changes by release
 
+### 1.7.9
+
+- Enforces the "Limit votes" option when the vote is submitted, not only on the voting form, so a member who has not posted in the topic can no longer vote by sending the request directly.
+- Refuses guests in polls limited to members who posted in the topic, as multi-question polls already did.
+- Fixes voting in multi-question polls, which failed with an SQL error since 1.4.0, and returns the confirmation message and the first question's own totals after each vote.
+- Translates the poll data cleanup page into every bundled language.
+- Escapes output with phpBB's `utf8_htmlspecialchars()` and casts or escapes every dynamic value in SQL conditions, as the Extension Pre Validator expects.
+- Declares the licence as `GPL-2.0-only`, the current SPDX identifier for the same licence.
+
 ### 1.7.8
 
 - Keeps posts and edits submittable when the poll panel renders "Options per user" as 0, which happened on every first post of a topic without a poll.
@@ -185,7 +194,7 @@ No additional setup is required for the remaining features.
 3. Enable the extension again so phpBB can apply the new migrations.
 4. Purge the phpBB cache and review the extension settings and permissions.
 
-Always use this disable/replace/enable sequence. Version 1.7.8 includes the posting-form fix for the options-per-user field, the corrected ACP confirmation target, explicit POST handling for confirmed cleanup actions, resumable poll-data cleanup, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
+Always use this disable/replace/enable sequence. Version 1.7.9 includes the server-side check of the "Limit votes" option, the multi-question voting fix, the posting-form fix for the options-per-user field, the corrected ACP confirmation target, explicit POST handling for confirmed cleanup actions, resumable poll-data cleanup, and the scheduled-start schema correction from version 1.7.1. phpBB must run all pending migrations before using these features.
 
 ## Poll data cleanup
 
