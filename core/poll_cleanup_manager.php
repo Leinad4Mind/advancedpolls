@@ -151,8 +151,7 @@ class poll_cleanup_manager
 
 		$sql = 'SELECT t.topic_id
 			FROM ' . $topics_table . ' t
-			WHERE t.topic_id > ' . $after_topic_id . '
-				AND ' . $condition . '
+			WHERE ' . implode(' AND ', array('t.topic_id > ' . (int) $after_topic_id, $condition)) . '
 			ORDER BY t.topic_id ASC';
 		$result = $this->db->sql_query_limit($sql, $limit + 1);
 		$topic_ids = array();
@@ -358,13 +357,13 @@ class poll_cleanup_manager
 
 	protected function has_options_condition($topic_alias, $options_table)
 	{
-		return 'EXISTS (SELECT 1 FROM ' . $options_table . ' ap_cleanup_option
-			WHERE ap_cleanup_option.topic_id = ' . $topic_alias . '.topic_id)';
+		return sprintf('EXISTS (SELECT 1 FROM %1$s ap_cleanup_option
+			WHERE ap_cleanup_option.topic_id = %2$s.topic_id)', $options_table, $topic_alias);
 	}
 
 	protected function has_votes_condition($topic_alias, $votes_table)
 	{
-		return 'EXISTS (SELECT 1 FROM ' . $votes_table . ' ap_cleanup_vote
-			WHERE ap_cleanup_vote.topic_id = ' . $topic_alias . '.topic_id)';
+		return sprintf('EXISTS (SELECT 1 FROM %1$s ap_cleanup_vote
+			WHERE ap_cleanup_vote.topic_id = %2$s.topic_id)', $votes_table, $topic_alias);
 	}
 }

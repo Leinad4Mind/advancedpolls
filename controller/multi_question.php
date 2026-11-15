@@ -342,14 +342,14 @@ class multi_question
 			? 'vote_user_id = ' . (int) $identity['user_id']
 			: 'vote_user_id = ' . ANONYMOUS . " AND vote_guest_token = '" . $this->db->sql_escape($identity['token_hash']) . "'";
 		$sql = 'SELECT ballot_id FROM ' . $this->ballots_table . '
-			WHERE topic_id = ' . (int) $topic_id . ' AND ' . $ballot_where;
+			WHERE ' . implode(' AND ', array('topic_id = ' . (int) $topic_id, $ballot_where));
 		$result = $this->db->sql_query_limit($sql, 1);
 		$current['_completed'] = (bool) $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 		$where = $this->identity_where($identity, true);
 		$sql = 'SELECT poll_option_id, wolfsblvt_poll_option_value
 			FROM ' . POLL_VOTES_TABLE . '
-			WHERE topic_id = ' . (int) $topic_id . ' AND ' . $where;
+			WHERE ' . implode(' AND ', array('topic_id = ' . (int) $topic_id, $where));
 		$result = $this->db->sql_query($sql);
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -364,7 +364,7 @@ class multi_question
 		$sql = 'SELECT v.question_id, v.option_id, v.vote_value
 			FROM ' . $this->votes_table . ' v
 			INNER JOIN ' . $this->questions_table . ' q ON q.question_id = v.question_id
-			WHERE q.topic_id = ' . (int) $topic_id . ' AND ' . $where;
+			WHERE ' . implode(' AND ', array('q.topic_id = ' . (int) $topic_id, $where));
 		$result = $this->db->sql_query($sql);
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -419,7 +419,7 @@ class multi_question
 			? 'vote_user_id = ' . (int) $identity['user_id']
 			: 'vote_user_id = ' . ANONYMOUS . " AND vote_guest_token = '" . $this->db->sql_escape($identity['token_hash']) . "'";
 		$sql = 'DELETE FROM ' . $this->ballots_table . '
-			WHERE topic_id = ' . (int) $topic_id . ' AND ' . $ballot_where;
+			WHERE ' . implode(' AND ', array('topic_id = ' . (int) $topic_id, $ballot_where));
 		$this->db->sql_query($sql);
 		if ($record_ballot)
 		{
@@ -524,7 +524,7 @@ class multi_question
 		{
 			$sql = 'SELECT poll_option_id, wolfsblvt_poll_option_value, COUNT(*) AS voter_count
 				FROM ' . POLL_VOTES_TABLE . '
-				WHERE topic_id = ' . $topic_id . ' AND poll_option_id > 0
+				WHERE topic_id = ' . (int) $topic_id . ' AND poll_option_id > 0
 				GROUP BY poll_option_id, wolfsblvt_poll_option_value';
 			$result = $this->db->sql_query($sql);
 			while ($row = $this->db->sql_fetchrow($result))

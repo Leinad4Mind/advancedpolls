@@ -107,7 +107,7 @@ class multi_question_manager
 		$sql = 'SELECT v.question_id, v.option_id, v.vote_value
 			FROM ' . $this->votes_table . ' v
 			INNER JOIN ' . $this->questions_table . ' q ON q.question_id = v.question_id
-			WHERE q.topic_id = ' . (int) $topic_id . ' AND ' . $where;
+			WHERE ' . implode(' AND ', array('q.topic_id = ' . (int) $topic_id, $where));
 		$result = $this->db->sql_query($sql);
 		$votes = array();
 		while ($row = $this->db->sql_fetchrow($result))
@@ -133,7 +133,7 @@ class multi_question_manager
 			: 'vote_user_id = ' . ANONYMOUS . " AND wolfsblvt_vote_guest_token = '" . $this->db->sql_escape($guest_token_hash) . "'";
 		$sql = 'SELECT poll_option_id, wolfsblvt_poll_option_value
 			FROM ' . POLL_VOTES_TABLE . '
-			WHERE topic_id = ' . (int) $topic_id . ' AND poll_option_id > 0 AND ' . $where;
+			WHERE ' . implode(' AND ', array('topic_id = ' . (int) $topic_id, 'poll_option_id > 0', $where));
 		$result = $this->db->sql_query($sql);
 		$votes = array();
 		while ($row = $this->db->sql_fetchrow($result))
@@ -184,7 +184,7 @@ class multi_question_manager
 			? 'vote_user_id = ' . (int) $user_id
 			: 'vote_user_id = ' . ANONYMOUS . " AND vote_guest_token = '" . $this->db->sql_escape($guest_token_hash) . "'";
 		$sql = 'SELECT ballot_id FROM ' . $this->ballots_table . '
-			WHERE topic_id = ' . (int) $topic_id . ' AND ' . $where;
+			WHERE ' . implode(' AND ', array('topic_id = ' . (int) $topic_id, $where));
 		$result = $this->db->sql_query_limit($sql, 1);
 		$exists = (bool) $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -294,8 +294,8 @@ class multi_question_manager
 				{
 					$sql = 'UPDATE ' . $this->questions_table . '
 						SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-						WHERE question_id = ' . $question_id . '
-							AND topic_id = ' . $topic_id;
+						WHERE question_id = ' . (int) $question_id . '
+							AND topic_id = ' . (int) $topic_id;
 					$this->db->sql_query($sql);
 				}
 				else
@@ -315,7 +315,7 @@ class multi_question_manager
 			}
 			if (!$questions)
 			{
-				$sql = 'DELETE FROM ' . $this->ballots_table . ' WHERE topic_id = ' . $topic_id;
+				$sql = 'DELETE FROM ' . $this->ballots_table . ' WHERE topic_id = ' . (int) $topic_id;
 				$this->db->sql_query($sql);
 			}
 			$this->db->sql_transaction('commit');
@@ -406,7 +406,7 @@ class multi_question_manager
 			{
 				$sql = 'UPDATE ' . $this->options_table . '
 					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-					WHERE option_id = ' . $option_id . '
+					WHERE option_id = ' . (int) $option_id . '
 						AND question_id = ' . (int) $question_id;
 				$this->db->sql_query($sql);
 			}

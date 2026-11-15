@@ -86,7 +86,7 @@ class v1_3_0_data extends \phpbb\db\migration\migration
 			SET wolfsblvt_poll_notified = 1
 			WHERE poll_start > 0
 				AND poll_length > 0
-				AND poll_start + poll_length <= ' . $now;
+				AND poll_start + poll_length <= ' . (int) $now;
 		$this->db->sql_query($sql);
 
 		$this->config->set('wolfsblvt.advancedpolls.pollend_last_gc', $now, false);

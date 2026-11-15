@@ -49,7 +49,7 @@ class pollend extends \phpbb\cron\task\base
 			WHERE poll_start > 0 AND poll_length > 0
 			AND (wolfsblvt_poll_visibility IN (2, 3) OR wolfsblvt_poll_votes_hide = 1)
 			AND wolfsblvt_poll_notified = 0
-			AND poll_start + poll_length <= ' . $now . '
+			AND poll_start + poll_length <= ' . (int) $now . '
 			ORDER BY poll_start + poll_length ASC';
 		$result = $this->db->sql_query($sql);
 

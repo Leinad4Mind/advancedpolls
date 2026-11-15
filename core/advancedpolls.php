@@ -1596,7 +1596,7 @@ class advancedpolls
 			$sql = 'SELECT post_id
 				FROM ' . POSTS_TABLE . '
 				WHERE poster_id = ' . (int) $this->user->data['user_id'] . '
-					AND topic_id = ' . $topic_id;
+					AND topic_id = ' . (int) $topic_id;
 			$result = $this->db->sql_query_limit($sql, 1);
 			$has_posted = (bool) $this->db->sql_fetchrow($result);
 			$this->db->sql_freeresult($result);

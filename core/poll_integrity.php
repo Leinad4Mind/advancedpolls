@@ -118,8 +118,8 @@ class poll_integrity
 
 	protected static function has_options_condition($topic_alias, $options_table)
 	{
-		return 'EXISTS (SELECT 1
-			FROM ' . $options_table . ' ap_poll_option
-			WHERE ap_poll_option.topic_id = ' . $topic_alias . '.topic_id)';
+		return sprintf('EXISTS (SELECT 1
+			FROM %1$s ap_poll_option
+			WHERE ap_poll_option.topic_id = %2$s.topic_id)', $options_table, $topic_alias);
 	}
 }
