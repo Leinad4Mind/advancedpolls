@@ -18,6 +18,7 @@ class language_catalog_test extends TestCase
 	{
 		$root = dirname(__DIR__) . '/language';
 		$files = array(
+			'acp_cleanup.php',
 			'advancedpolls.php',
 			'advancedpolls_common.php',
 			'info_acp_advancedpolls.php',
@@ -68,6 +69,7 @@ class language_catalog_test extends TestCase
 	{
 		$root = dirname(__DIR__) . '/language';
 		$files = array(
+			'acp_cleanup.php',
 			'advancedpolls.php',
 			'advancedpolls_common.php',
 			'info_acp_advancedpolls.php',
