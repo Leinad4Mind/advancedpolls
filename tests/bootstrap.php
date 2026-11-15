@@ -76,6 +76,10 @@ if (!defined('ITEM_APPROVED'))
 {
 	define('ITEM_APPROVED', 1);
 }
+if (!defined('ITEM_LOCKED'))
+{
+	define('ITEM_LOCKED', 1);
+}
 
 require_once __DIR__ . '/../core/poll_options.php';
 require_once __DIR__ . '/../core/poll_integrity.php';

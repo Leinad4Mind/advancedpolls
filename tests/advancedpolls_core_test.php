@@ -575,6 +575,127 @@ class advancedpolls_core_test extends TestCase
 		$this->assertArrayNotHasKey('results_hidden', $data);
 	}
 
+	public function test_voters_limit_refuses_a_submitted_vote_from_a_member_who_has_not_posted()
+	{
+		list($core, $queries) = $this->create_voters_limit_core(array('user_id' => 5, 'is_registered' => true), false, 1, null, true);
+		$can_vote = $this->submit_choice_vote($core, $this->voters_limit_topic());
+
+		$this->assertFalse($can_vote, 'phpBB stores the vote when s_can_vote stays true');
+		$this->assertCount(1, $queries->posts);
+		$this->assertStringContainsString('poster_id = 5', $queries->posts[0]);
+		$this->assertStringContainsString('topic_id = 12', $queries->posts[0]);
+	}
+
+	public function test_voters_limit_lets_a_member_who_has_posted_vote()
+	{
+		list($core) = $this->create_voters_limit_core(array('user_id' => 5, 'is_registered' => true), true);
+
+		$this->assertTrue($this->submit_choice_vote($core, $this->voters_limit_topic()));
+	}
+
+	public function test_voters_limit_refuses_guests_even_when_a_guest_posted_in_the_topic()
+	{
+		list($core, $queries) = $this->create_voters_limit_core(array('user_id' => ANONYMOUS, 'is_registered' => false), true, 1, null, true);
+
+		$this->assertFalse($this->submit_choice_vote($core, $this->voters_limit_topic()));
+		$this->assertCount(0, $queries->posts, 'guests share one user id, so their posts are not looked up');
+	}
+
+	public function test_voters_limit_is_ignored_when_disabled_in_the_acp_or_on_the_poll()
+	{
+		list($core, $queries) = $this->create_voters_limit_core(array('user_id' => 5, 'is_registered' => true), false, 0);
+		$this->assertTrue($this->submit_choice_vote($core, $this->voters_limit_topic()));
+
+		list($core, $queries) = $this->create_voters_limit_core(array('user_id' => 5, 'is_registered' => true), false);
+		$topic = $this->voters_limit_topic();
+		$topic['wolfsblvt_poll_voters_limit'] = 0;
+		$this->assertTrue($this->submit_choice_vote($core, $topic));
+		$this->assertCount(0, $queries->posts);
+	}
+
+	public function test_voters_limit_check_runs_once_per_topic_and_honours_the_event()
+	{
+		$dispatcher = $this->createMock(\phpbb\event\dispatcher_interface::class);
+		$dispatcher->expects($this->once())->method('trigger_event')
+			->with('wolfsblvt.advancedpolls.modify_poll_limit', $this->callback(function ($vars) {
+				return $vars['not_be_able_to_vote'] === true && $vars['has_posted'] === false;
+			}))
+			->willReturnCallback(function ($name, $vars) {
+				$vars['not_be_able_to_vote'] = false;
+				$vars['reason'] = '';
+				return $vars;
+			});
+		list($core, $queries) = $this->create_voters_limit_core(array('user_id' => 5, 'is_registered' => true), false, 1, $dispatcher);
+
+		$this->assertTrue($this->submit_choice_vote($core, $this->voters_limit_topic()), 'an extension may lift the limit');
+		$check = new \ReflectionMethod($core, 'check_poll_voters_limit');
+		$check->setAccessible(true);
+		$this->assertSame(array(false, ''), $check->invoke($core, $this->voters_limit_topic()));
+		$this->assertCount(1, $queries->posts, 'the form reuses the answer given to the vote');
+	}
+
+	public function test_poll_form_explains_a_vote_refused_by_the_voters_limit()
+	{
+		$source = file_get_contents(__DIR__ . '/../core/advancedpolls.php');
+
+		$this->assertIsString($source);
+		$this->assertStringContainsString('$voters_limit_blocked = !empty($this->voters_limit_blocked[(int) $topic_data[\'topic_id\']]);', $source);
+		$this->assertStringContainsString('($poll_template_data[\'S_CAN_VOTE\'] || $voters_limit_blocked)', $source);
+		$this->assertSame(2, substr_count($source, '$this->check_poll_voters_limit($topic_data)'));
+		$this->assertSame(1, substr_count($source, 'FROM \' . POSTS_TABLE'));
+	}
+
+	private function voters_limit_topic()
+	{
+		$topic = $this->topic_data(poll_options::VISIBILITY_PUBLIC, poll_options::VOTE_MODE_NO_CHANGE);
+		$topic['topic_id'] = 12;
+		$topic['topic_status'] = 0;
+		$topic['forum_status'] = 0;
+		$topic['wolfsblvt_poll_voters_limit'] = 1;
+
+		return $topic;
+	}
+
+	private function submit_choice_vote(advancedpolls $core, array $topic)
+	{
+		$vote_counts = array(1 => 0, 2 => 0);
+		$cur_voted_id = array();
+		$voted_id = array(1);
+		$poll_info = array(array('poll_option_id' => 1), array('poll_option_id' => 2));
+		$can_vote = false;
+		$display_results = false;
+
+		$core->do_poll_voting_modifications($topic, $vote_counts, $cur_voted_id, $voted_id, $poll_info, $can_vote, $display_results, '/topic');
+
+		return $can_vote;
+	}
+
+	private function create_voters_limit_core(array $user_data, $has_posted, $acp_enabled = 1, $dispatcher = null, $submitted = false)
+	{
+		$queries = new \stdClass();
+		$queries->posts = array();
+		$db = $this->createMock(\phpbb\db\driver\driver_interface::class);
+		$db->method('sql_query')->willReturn('votes');
+		$db->method('sql_query_limit')->willReturnCallback(function ($sql) use ($queries) {
+			$queries->posts[] = $sql;
+			return 'posts';
+		});
+		$db->method('sql_fetchrow')->willReturnCallback(function ($result) use ($has_posted) {
+			return ($result === 'posts' && $has_posted) ? array('post_id' => 40) : false;
+		});
+
+		// Allowed votes go on to the form key check, which needs phpBB, so only refused ones are submitted
+		$core = $this->create_core($submitted ? array('update' => true) : array(), array(
+			'wolfsblvt.advancedpolls.activate_poll_voters_limit' => $acp_enabled,
+		), true, null, $db, $dispatcher);
+		$user = (new \ReflectionProperty($core, 'user'));
+		$user->setAccessible(true);
+		$user->getValue($core)->data = array_merge(array('is_bot' => false), $user_data);
+		$user->getValue($core)->lang['AP_POLL_REASON_NOT_POSTED'] = 'You haven’t posted in this topic.';
+
+		return array($core, $queries);
+	}
+
 	private function topic_data($visibility, $vote_mode)
 	{
 		return array(
@@ -587,7 +708,7 @@ class advancedpolls_core_test extends TestCase
 		);
 	}
 
-	private function create_core(array $request_values = array(), array $config_values = array(), $acl = false, $request = null, $db = null)
+	private function create_core(array $request_values = array(), array $config_values = array(), $acl = false, $request = null, $db = null, $dispatcher = null)
 	{
 		$db = $db ?: $this->createMock(\phpbb\db\driver\driver_interface::class);
 		$config = new \phpbb\config\config(array_merge(array(
@@ -680,7 +801,11 @@ class advancedpolls_core_test extends TestCase
 				return array_key_exists($name, $request_values);
 			});
 		}
-		$dispatcher = $this->createMock(\phpbb\event\dispatcher_interface::class);
+		if ($dispatcher === null)
+		{
+			$dispatcher = $this->createMock(\phpbb\event\dispatcher_interface::class);
+			$dispatcher->method('trigger_event')->willReturnArgument(1);
+		}
 		$controller_helper = $this->createMock(\phpbb\controller\helper::class);
 		$controller_helper->method('route')->willReturn('/app.php/advancedpolls/infopoll/12');
 

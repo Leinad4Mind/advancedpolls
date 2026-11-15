@@ -49,6 +49,12 @@ class advancedpolls
 	/** @var int|null */
 	protected $scheduled_start;
 
+	/** @var array Result of the voters limit check for the current user, by topic id */
+	protected $voters_limit_checks = [];
+
+	/** @var array Topics where the voters limit refused a vote the user could otherwise cast */
+	protected $voters_limit_blocked = [];
+
 	/**
 	 * Constructor
 	 *
@@ -668,6 +674,18 @@ class advancedpolls
 			$topic_data['forum_status'] != ITEM_LOCKED &&
 			($s_vote_incomplete || $s_can_change_vote);
 		$s_can_vote = $s_can_vote || $can_cast_vote;
+
+		// phpBB stores the vote right after this event, so the voters limit is enforced here and not only on the form
+		if ($s_can_vote && !empty($topic_data['wolfsblvt_poll_voters_limit']) && in_array('wolfsblvt_poll_voters_limit', $options))
+		{
+			list($not_be_able_to_vote) = $this->check_poll_voters_limit($topic_data);
+
+			if ($not_be_able_to_vote)
+			{
+				$s_can_vote = false;
+				$this->voters_limit_blocked[(int) $topic_data['topic_id']] = true;
+			}
+		}
 
 		$poll_ended = !empty($topic_data['poll_length'])
 			&& (int) $topic_data['poll_start'] + (int) $topic_data['poll_length'] <= time();
@@ -1347,40 +1365,14 @@ class advancedpolls
 			$poll_template_data['AP_POLL_SHOW_VOTERS'] = true;
 		}
 
-		if ($topic_data['wolfsblvt_poll_voters_limit'] == 1 && in_array('wolfsblvt_poll_voters_limit', $options) && $poll_template_data['S_CAN_VOTE'])
+		// The vote may already have been refused by the voters limit, which also cleared S_CAN_VOTE
+		$voters_limit_blocked = !empty($this->voters_limit_blocked[(int) $topic_data['topic_id']]);
+
+		if (!empty($topic_data['wolfsblvt_poll_voters_limit']) && in_array('wolfsblvt_poll_voters_limit', $options) && ($poll_template_data['S_CAN_VOTE'] || $voters_limit_blocked))
 		{
 			$javascript_vars['wolfsblvt_poll_voters_limit_topic'] = true;
 
-			$not_be_able_to_vote = false;
-			$reason = '';
-
-			// Check if user has posted in this thread
-			$sql = 'SELECT post_id
-					FROM ' . POSTS_TABLE . '
-					WHERE poster_id = ' . $this->user->data['user_id'] . '
-						AND topic_id = ' . $topic_data['topic_id'];
-			$result = $this->db->sql_query_limit($sql, 1);
-			$has_posted = ($this->db->sql_fetchrow($result)) ? true : false;
-			$this->db->sql_freeresult($result);
-
-			if (!$has_posted)
-			{
-				$not_be_able_to_vote = true;
-				$reason = $this->user->lang['AP_POLL_REASON_NOT_POSTED'];
-			}
-
-			/**
-			 * Event to modify the limit poll modification
-			 *
-			 * @event wolfsblvt.advancedpolls.modify_poll_limit
-			 * @var	bool	not_be_able_to_vote			Bool if the user should be able to vote.
-			 * @var bool	has_posted					Bool if the user already has posted in this topic
-			 * @var string	reason						The reason why the user can't vote. Should be translated already.
-			 * @var	array	topic_data					The topic data array
-			 * @since 1.0.0
-			 */
-			$vars = ['not_be_able_to_vote', 'has_posted', 'reason', 'topic_data'];
-			extract($this->dispatcher->trigger_event('wolfsblvt.advancedpolls.modify_poll_limit', compact($vars)));
+			list($not_be_able_to_vote, $reason) = $this->check_poll_voters_limit($topic_data);
 
 			if ($not_be_able_to_vote)
 			{
@@ -1577,6 +1569,58 @@ class advancedpolls
 			return $score_order ?: ((int) $a['POLL_OPTION_ID'] - (int) $b['POLL_OPTION_ID']);
 		}
 		return (((int) $b['POLL_OPTION_RESULT'] - (int) $a['POLL_OPTION_RESULT']) ?: ((int) $a['POLL_OPTION_ID'] - (int) $b['POLL_OPTION_ID']));
+	}
+
+	/**
+	 * Check whether the current user is kept from voting by the voters limit (posted in the topic first)
+	 *
+	 * The vote and the form use the same answer, worked out once per topic.
+	 *
+	 * @param array $topic_data		Topic data
+	 * @return array				[bool $not_be_able_to_vote, string $reason]
+	 */
+	protected function check_poll_voters_limit(array $topic_data)
+	{
+		$topic_id = (int) $topic_data['topic_id'];
+
+		if (isset($this->voters_limit_checks[$topic_id]))
+		{
+			return $this->voters_limit_checks[$topic_id];
+		}
+
+		// Every guest shares the anonymous user id, so a guest post never counts as having posted
+		$has_posted = false;
+
+		if ($this->user->data['is_registered'])
+		{
+			$sql = 'SELECT post_id
+				FROM ' . POSTS_TABLE . '
+				WHERE poster_id = ' . (int) $this->user->data['user_id'] . '
+					AND topic_id = ' . $topic_id;
+			$result = $this->db->sql_query_limit($sql, 1);
+			$has_posted = (bool) $this->db->sql_fetchrow($result);
+			$this->db->sql_freeresult($result);
+		}
+
+		$not_be_able_to_vote = !$has_posted;
+		$reason = $has_posted ? '' : $this->user->lang['AP_POLL_REASON_NOT_POSTED'];
+
+		/**
+		 * Event to modify the limit poll modification
+		 *
+		 * @event wolfsblvt.advancedpolls.modify_poll_limit
+		 * @var	bool	not_be_able_to_vote			Bool if the user should be able to vote.
+		 * @var bool	has_posted					Bool if the user already has posted in this topic
+		 * @var string	reason						The reason why the user can't vote. Should be translated already.
+		 * @var	array	topic_data					The topic data array
+		 * @since 1.0.0
+		 */
+		$vars = ['not_be_able_to_vote', 'has_posted', 'reason', 'topic_data'];
+		extract($this->dispatcher->trigger_event('wolfsblvt.advancedpolls.modify_poll_limit', compact($vars)));
+
+		$this->voters_limit_checks[$topic_id] = [(bool) $not_be_able_to_vote, (string) $reason];
+
+		return $this->voters_limit_checks[$topic_id];
 	}
 
 	/**
