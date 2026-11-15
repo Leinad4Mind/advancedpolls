@@ -325,7 +325,7 @@ class advancedpolls
 					: '';
 			}
 			$page_data['WOLFSBLVT_POLL_START'] = true;
-			$page_data['WOLFSBLVT_POLL_START_VALUE'] = htmlspecialchars($requested_start, ENT_COMPAT, 'UTF-8');
+			$page_data['WOLFSBLVT_POLL_START_VALUE'] = utf8_htmlspecialchars($requested_start);
 		}
 
 		if ($post_data['poll_length'])
@@ -499,7 +499,7 @@ class advancedpolls
 		foreach ($options as $value => $language_key)
 		{
 			$html .= '<option value="' . (int) $value . '"' . ((int) $selected === (int) $value ? ' selected="selected"' : '') . '>'
-				. htmlspecialchars($this->user->lang[$language_key], ENT_COMPAT, 'UTF-8') . '</option>';
+				. utf8_htmlspecialchars($this->user->lang[$language_key]) . '</option>';
 		}
 		return $html;
 	}

@@ -345,8 +345,9 @@ class package_validation_test extends TestCase
 		$this->assertStringContainsString('$mode === \'retain\'', $lifecycle);
 		$this->assertStringContainsString('$mode === \'remove\'', $lifecycle);
 		$this->assertStringContainsString('SUM(wolfsblvt_poll_option_value)', $lifecycle);
-		$this->assertStringContainsString("htmlspecialchars(\$json ?: '[]', ENT_COMPAT, 'UTF-8')", $listener);
-		$this->assertStringContainsString("htmlspecialchars(censor_text(\$question['text']), ENT_QUOTES, 'UTF-8')", $listener);
+		$this->assertStringContainsString("utf8_htmlspecialchars(\$json ?: '[]')", $listener);
+		$this->assertStringContainsString("utf8_htmlspecialchars(censor_text(\$question['text']))", $listener);
+		$this->assertStringContainsString("utf8_htmlspecialchars(censor_text(\$option['text']))", $listener);
 		$this->assertSame(2, substr_count($listener, "raw_variable('ap_multi_questions'"));
 		$this->assertStringContainsString("raw_variable('answers'", $multi_controller);
 		$this->assertStringContainsString('AP_POLL_COLLAPSIBLE', $core);
@@ -403,6 +404,21 @@ class package_validation_test extends TestCase
 				continue;
 			}
 			$this->assertStringNotContainsString($removed_key, file_get_contents($file->getPathname()), $file->getPathname());
+		}
+	}
+
+	public function test_output_escaping_uses_phpbb_utf8_helper()
+	{
+		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->extension_root()));
+		foreach ($iterator as $file)
+		{
+			$path = str_replace('\\', '/', $file->getPathname());
+			if (!$file->isFile() || substr($path, -4) !== '.php' || strpos($path, '/tests/') !== false)
+			{
+				continue;
+			}
+			// EPV rejects the plain function; utf8_htmlspecialchars() is the phpBB helper
+			$this->assertDoesNotMatchRegularExpression('/(?<![\w>])htmlspecialchars\s*\(/', file_get_contents($path), $path);
 		}
 	}
 

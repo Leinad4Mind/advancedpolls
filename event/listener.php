@@ -255,7 +255,7 @@ class listener implements EventSubscriberInterface
 		{
 			$json = json_encode($topic_id ? $this->multi_question_manager->load($topic_id) : []);
 		}
-		$page_data['AP_MULTI_QUESTIONS_JSON'] = htmlspecialchars($json ?: '[]', ENT_COMPAT, 'UTF-8');
+		$page_data['AP_MULTI_QUESTIONS_JSON'] = utf8_htmlspecialchars($json ?: '[]');
 		$page_data['AP_CAN_APPEND_OPTIONS'] = $event['mode'] === 'edit'
 			&& !empty($post_data['poll_title'])
 			&& isset($post_data['topic_first_post_id'])
@@ -527,7 +527,7 @@ class listener implements EventSubscriberInterface
 			$this->template->assign_block_vars('ap_question', [
 				'ID'                => (int) $question['id'],
 				'NUMBER'            => $question_index + 2,
-				'TEXT'              => htmlspecialchars(censor_text($question['text']), ENT_QUOTES, 'UTF-8'),
+				'TEXT'              => utf8_htmlspecialchars(censor_text($question['text'])),
 				'REQUIRED'          => $question['required'],
 				'S_CAN_VOTE'        => !empty($poll_template_data['S_CAN_VOTE']),
 				'S_DISPLAY_RESULTS' => !empty($poll_template_data['S_DISPLAY_RESULTS']),
@@ -584,7 +584,7 @@ class listener implements EventSubscriberInterface
 				$display_total = $average_mode ? $formatted_average : (int) $option['total'];
 				$this->template->assign_block_vars('ap_question.option', [
 					'ID'            => (int) $option['id'],
-					'TEXT'          => htmlspecialchars(censor_text($option['text']), ENT_QUOTES, 'UTF-8'),
+					'TEXT'          => utf8_htmlspecialchars(censor_text($option['text'])),
 					'TOTAL'         => $display_total,
 					'PERCENT'       => $bar_percent,
 					'SHOW_PERCENT'  => !$average_mode || $show_percent,

@@ -81,6 +81,9 @@ if (!defined('ITEM_LOCKED'))
 	define('ITEM_LOCKED', 1);
 }
 
+// utf8_htmlspecialchars() and the other UTF helpers the extension calls
+require_once $phpbb_root . '/includes/utf/utf_tools.php';
+
 require_once __DIR__ . '/../core/poll_options.php';
 require_once __DIR__ . '/../core/poll_integrity.php';
 require_once __DIR__ . '/../core/poll_list_order.php';

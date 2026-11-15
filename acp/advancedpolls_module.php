@@ -269,9 +269,9 @@ class advancedpolls_module
 			$integrity = $row['integrity'];
 			$this->template->assign_block_vars('poll_row', array(
 				'TOPIC_ID' => (int) $row['topic_id'],
-				'TOPIC_TITLE' => htmlspecialchars((string) $row['topic_title'], ENT_COMPAT, 'UTF-8'),
-				'FORUM_NAME' => htmlspecialchars((string) $row['forum_name'], ENT_COMPAT, 'UTF-8'),
-				'POLL_TITLE' => htmlspecialchars((string) $row['poll_title'], ENT_COMPAT, 'UTF-8'),
+				'TOPIC_TITLE' => utf8_htmlspecialchars((string) $row['topic_title']),
+				'FORUM_NAME' => utf8_htmlspecialchars((string) $row['forum_name']),
+				'POLL_TITLE' => utf8_htmlspecialchars((string) $row['poll_title']),
 				'POLL_START' => $poll_start,
 				'POLL_START_DATE' => $poll_start > 0 ? $this->user->format_date($poll_start) : '-',
 				'POLL_LENGTH' => $poll_length,
@@ -292,7 +292,7 @@ class advancedpolls_module
 			{
 				$this->template->assign_block_vars('poll_row.option', array(
 					'ID' => (int) $option['poll_option_id'],
-					'TEXT' => htmlspecialchars((string) $option['poll_option_text'], ENT_COMPAT, 'UTF-8'),
+					'TEXT' => utf8_htmlspecialchars((string) $option['poll_option_text']),
 					'TOTAL' => (int) $option['poll_option_total'],
 				));
 			}
@@ -451,9 +451,9 @@ class advancedpolls_module
 			{
 				$labels[] = $this->user->lang[$language_keys[$filter]];
 			}
-			$html .= '<option value="' . htmlspecialchars($serialised, ENT_COMPAT, 'UTF-8') . '"'
+			$html .= '<option value="' . utf8_htmlspecialchars($serialised) . '"'
 				. ($serialised === $selected ? ' selected="selected"' : '') . '>'
-				. htmlspecialchars(implode(' > ', $labels), ENT_COMPAT, 'UTF-8') . '</option>';
+				. utf8_htmlspecialchars(implode(' > ', $labels)) . '</option>';
 		}
 
 		return $html;
@@ -472,7 +472,7 @@ class advancedpolls_module
 		foreach ($options as $value => $language_key)
 		{
 			$html .= '<option value="' . (int) $value . '"' . ((int) $selected === (int) $value ? ' selected="selected"' : '') . '>'
-				. htmlspecialchars($this->user->lang[$language_key], ENT_COMPAT, 'UTF-8') . '</option>';
+				. utf8_htmlspecialchars($this->user->lang[$language_key]) . '</option>';
 		}
 		return $html;
 	}
