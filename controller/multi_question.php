@@ -54,6 +54,8 @@ class multi_question
 	 */
 	public function submit($topic_id)
 	{
+		// VOTE_SUBMITTED and phpBB's own vote errors live in viewtopic, which a controller does not load
+		$this->user->add_lang('viewtopic');
 		$this->user->add_lang_ext('wolfsblvt/advancedpolls', 'advancedpolls');
 		if (!$this->request->is_ajax() || !check_form_key('posting'))
 		{
@@ -190,7 +192,7 @@ class multi_question
 		);
 		if (!$results_hidden)
 		{
-			$data['results'] = $this->load_results($questions);
+			$data['results'] = $this->load_results((int) $topic_id, $questions);
 			if ($rules['type'] === poll_options::TYPE_SCORING || $rules['type'] === poll_options::TYPE_RANKING)
 			{
 				$data['breakdowns'] = $this->load_breakdowns(
@@ -217,16 +219,18 @@ class multi_question
 
 	protected function load_topic($topic_id)
 	{
-		$sql = 'SELECT topic_id, forum_id, poll_title, poll_start, poll_length,
-			poll_max_options, topic_status, forum_status,
-			wolfsblvt_poll_type, wolfsblvt_poll_min_value, wolfsblvt_poll_max_value,
-			wolfsblvt_poll_total_value, wolfsblvt_poll_rank_points,
-			wolfsblvt_poll_vote_mode, wolfsblvt_poll_visibility,
-			wolfsblvt_poll_required, wolfsblvt_poll_voters_limit,
-			wolfsblvt_poll_voters_show, wolfsblvt_poll_score_result,
-			wolfsblvt_poll_show_percent, wolfsblvt_poll_scheduled_start
-			FROM ' . TOPICS_TABLE . '
-			WHERE topic_id = ' . (int) $topic_id;
+		// forum_status belongs to the forum, so the forums table is joined
+		$sql = 'SELECT t.topic_id, t.forum_id, t.poll_title, t.poll_start, t.poll_length,
+			t.poll_max_options, t.topic_status, f.forum_status,
+			t.wolfsblvt_poll_type, t.wolfsblvt_poll_min_value, t.wolfsblvt_poll_max_value,
+			t.wolfsblvt_poll_total_value, t.wolfsblvt_poll_rank_points,
+			t.wolfsblvt_poll_vote_mode, t.wolfsblvt_poll_visibility,
+			t.wolfsblvt_poll_required, t.wolfsblvt_poll_voters_limit,
+			t.wolfsblvt_poll_voters_show, t.wolfsblvt_poll_score_result,
+			t.wolfsblvt_poll_show_percent, t.wolfsblvt_poll_scheduled_start
+			FROM ' . TOPICS_TABLE . ' t
+			INNER JOIN ' . FORUMS_TABLE . ' f ON f.forum_id = t.forum_id
+			WHERE t.topic_id = ' . (int) $topic_id;
 		$result = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -495,7 +499,7 @@ class multi_question
 		}
 	}
 
-	protected function load_results(array $questions)
+	protected function load_results($topic_id, array $questions)
 	{
 		$results = array();
 		foreach ($questions as $question)
@@ -504,8 +508,14 @@ class multi_question
 			$table = $key === 'primary' ? POLL_OPTIONS_TABLE : $this->options_table;
 			$id_column = $key === 'primary' ? 'poll_option_id' : 'option_id';
 			$total_column = $key === 'primary' ? 'poll_option_total' : 'option_total';
+			$sql_where = array($this->db->sql_in_set($id_column, $question['option_ids']));
+			if ($key === 'primary')
+			{
+				// phpBB numbers poll options per topic, so option 1 exists in every poll
+				$sql_where[] = 'topic_id = ' . (int) $topic_id;
+			}
 			$sql = 'SELECT ' . $id_column . ' AS option_id, ' . $total_column . ' AS option_total FROM ' . $table . '
-				WHERE ' . $this->db->sql_in_set($id_column, $question['option_ids']);
+				WHERE ' . implode(' AND ', $sql_where);
 			$result = $this->db->sql_query($sql);
 			$results[$key] = array();
 			while ($row = $this->db->sql_fetchrow($result))

@@ -350,6 +350,11 @@ class package_validation_test extends TestCase
 		$this->assertStringContainsString("utf8_htmlspecialchars(censor_text(\$option['text']))", $listener);
 		$this->assertSame(2, substr_count($listener, "raw_variable('ap_multi_questions'"));
 		$this->assertStringContainsString("raw_variable('answers'", $multi_controller);
+		// forum_status is not a topics column: reading it from the topic row broke every multi-question vote
+		$this->assertStringContainsString("INNER JOIN ' . FORUMS_TABLE . ' f ON f.forum_id = t.forum_id", $multi_controller);
+		$this->assertStringContainsString('t.topic_status, f.forum_status', $multi_controller);
+		// phpBB numbers poll options per topic: the native results must be read from this topic only
+		$this->assertStringContainsString("\$sql_where[] = 'topic_id = ' . (int) \$topic_id;", $multi_controller);
 		$this->assertStringContainsString('AP_POLL_COLLAPSIBLE', $core);
 		$this->assertStringContainsString('activate_poll_collapsible', $core);
 		$this->assertStringContainsString('get_authorised_recipients($users', $options_notification);
