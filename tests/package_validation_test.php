@@ -415,14 +415,23 @@ class package_validation_test extends TestCase
 
 	public function test_output_escaping_uses_phpbb_utf8_helper()
 	{
-		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->extension_root()));
-		foreach ($iterator as $file)
+		// Only the extension's own code: CI checks phpBB out inside the extension folder
+		$files = array($this->extension_root() . '/ext.php');
+		foreach (array('acp', 'controller', 'core', 'cron', 'event', 'migrations', 'notification') as $directory)
 		{
-			$path = str_replace('\\', '/', $file->getPathname());
-			if (!$file->isFile() || substr($path, -4) !== '.php' || strpos($path, '/tests/') !== false)
+			$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->extension_root() . '/' . $directory, \FilesystemIterator::SKIP_DOTS));
+			foreach ($iterator as $file)
 			{
-				continue;
+				if (substr($file->getFilename(), -4) === '.php')
+				{
+					$files[] = $file->getPathname();
+				}
 			}
+		}
+
+		$this->assertGreaterThan(30, count($files));
+		foreach ($files as $path)
+		{
 			// EPV rejects the plain function; utf8_htmlspecialchars() is the phpBB helper
 			$this->assertDoesNotMatchRegularExpression('/(?<![\w>])htmlspecialchars\s*\(/', file_get_contents($path), $path);
 		}
